@@ -2,25 +2,23 @@ Zeus_ID = 7
 Start_Time = os.date("%c")
 
 Title = {
-    '',
+    '                                                   ',
     '---------------------------------------------------',
-    '                                                 ',
-    '         #  #######  #          #      ######    ',
-    '        ###    #     #         ###    ##         ',
-    '       #   #   #     #        #   #   ##         ',
-    '      #     #  #     #       #     #   #####     ',
-    '      #######  #     #       #######       ##    ',
-    '      #     #  #     #       #     #       ##    ',
-    '      #     #  #     ######  #     #  ######     ',
-    '                                                 ',
+    '                                                   ',
+    '         #  #######  #          #      ######      ',
+    '        ###    #     #         ###    ##           ',
+    '       #   #   #     #        #   #   ##           ',
+    '      #     #  #     #       #     #   #####       ',
+    '      #######  #     #       #######       ##      ',
+    '      #     #  #     #       #     #       ##      ',
+    '      #     #  #     ######  #     #  ######       ',
+    '                                                   ',
     '---------------------------------------------------',
     '              +           ',
     '---------------------------------------------------',
-    '                                                ',
-    '                                                ',
-    '                                                ',
-    '                       ////                    ',
-    ''
+    '                                                   ',
+    '                                                   ',
+    '                                                   '
 }
 
 os.setComputerLabel("Atlas")
@@ -33,6 +31,7 @@ Cords_Set = false
 
 
 function PrintTitle()
+    term.setBackgroundColor(colors.black)
     term.clear()
     for y_offset, line in pairs(Title) do
         term.setCursorPos(1, y_offset)
@@ -117,7 +116,7 @@ function Ask_Cords()
     term.setCursorPos(24, 18)
     Cord_Z = read()
     Cords_Set = true
-    Write_Cord_Save(Cord_X, Cord_Y, Cord_Y)
+    Write_Cord_Save(Cord_X, Cord_Y, Cord_Z)
 end
 
 function Boot()
@@ -133,7 +132,7 @@ function Boot()
 
     
     PrintTitle()
-    term.setCursorPos(1, 17)
+    term.setCursorPos(1, 16)
     peripheral.find("modem", rednet.open)
     Contact_Zeus()
     shell.run("gps", "host", Cord_X, Cord_Y, Cord_Z)
