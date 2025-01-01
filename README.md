@@ -1,2 +1,0 @@
-# OlympOS
-Minecraft CC:Tweaked 
