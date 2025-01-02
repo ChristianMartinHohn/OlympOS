@@ -1,8 +1,9 @@
---
+--Muss Reworked werden!!!
+--Aktuelle Hauptfunktion ist das Loggen von Turtles und deren Namen zuweisung
 
 peripheral.find("modem", rednet.open)
 
---send msg to Zeus low FUEL chest
+
 
 Title = {
     '                                                   ',
@@ -21,9 +22,9 @@ Title = {
     '             +                                     ',
     '---------------------------------------------------',
     '                                                   ',
-    '                        /                          ',
-    '                        /                          ',
-    '                        /                          ',
+    '                                                   ',
+    '                                                   ',
+    '                                                   ',
     '                                                   ',
 }
 
@@ -61,6 +62,8 @@ local function file_exists(file)
     return f ~= nil
 end
 
+--Drone Iteration und Slave List müssen noch zusammengefügt werden und dann in einer Datei gespeicher, aktuell werden die in zwei unterschiedlichen gespeicher. Außerdem muss ich mir noch anschauen wie man Tables in einer File speichert und dann wieder richtig lädt
+
 function Read_Drone_Iteration()
     if not file_exists("disk/Drone_Iteration.txt") then 
         local f = io.open("disk/Drone_Iteration.txt", "w")
@@ -91,6 +94,20 @@ function Read_Slave_List()
         lines[#lines + 1] = line
     end
     return lines
+end
+
+function Check_Turtle_FuelChest()
+    --Check ob genug fuel in FuelChest, sollte angeschlossen sein per Kabel
+    --Bei zu wenig meldung an Zeus schicken
+end
+
+function Build_new_Turtle()
+    --Send Command to Hephaestus(Turtle Constructor)
+end
+
+function Check_Active_Turtles() 
+    --Check wie viele Turtles gerade Aktiv sind
+    --Evtl evaluieren ob weitere gestarten werden sollen
 end
 
 
