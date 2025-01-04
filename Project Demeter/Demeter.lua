@@ -1,6 +1,46 @@
 --Muss Reworked werden!!!
 --Aktuelle Hauptfunktion ist das Loggen von Turtles und deren Namen zuweisung
 
+--TODO
+--Ich muss mir dringend anschauen wie man eine Table in einer Datei speichert und die dann später wieder ausließt... wäre relativ wichtig für das Projekt
+--Actually ziemlich nice von CoPilot aber KP ob das funktioniert
+
+
+--CoPilot solution:
+local function save_table_to_file(tbl, filename)
+    local file = io.open(filename, "w")
+    if file then
+        file:write(textutils.serialize(tbl))
+        file:close()
+    else
+        error("Could not open file for writing: " .. filename)
+    end
+end
+
+-- Example usage
+local myTable = {name = "Turtle1", id = 1, tasks = {"mine", "build"}}
+save_table_to_file(myTable, "disk/myTable.txt")
+
+
+
+local function read_table_from_file(filename)
+    local file = io.open(filename, "r")
+    if file then
+        local content = file:read("*a")
+        file:close()
+        return textutils.unserialize(content)
+    else
+        error("Could not open file for reading: " .. filename)
+    end
+end
+
+-- Example usage
+local loadedTable = read_table_from_file("disk/myTable.txt")
+print(loadedTable.name)  -- Output: Turtle1
+
+
+
+
 peripheral.find("modem", rednet.open)
 
 
