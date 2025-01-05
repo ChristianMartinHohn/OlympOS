@@ -1,20 +1,23 @@
+Demeter_ID = 17 --ID des Demeter Computers ✓
+
 --Ding ist ich hab glaube ich ein bisschen falsch kalkuliert mit der farming höhe und allem, denke das wäre besser wenn der Turtle gesagt wird geh auf die höhe
 -- und mine dann die Rescource, weil aktuell würden die sich von Bedrock langsam Hoch arbeiten.
 --Was jetzt quasi hinzugefügt werden muss ist:
 --  1. Die Abrsprache mit Demeter was gemined werden soll und auf welcher höhe das liegt, dazu ob da schon gemined wurde
---  2. Das letzt endliche Stripminen entweder als classisches stripminen was ja mehr in die Breite geht oder mehr längere Tunnel... muss man mal schauen was einfacher oder Effectiver ist
+--  ✓  2. Das letzt endliche Stripminen entweder als classisches stripminen was ja mehr in die Breite geht oder mehr längere Tunnel... muss man mal schauen was einfacher oder Effectiver ist ✓
 --  3. Der Check wie voll das Inventar ist
 --  4. Evtl Refueling mit Lava aber dafür müsste man halt nen slot mit nem Eimer verbrauchen und dann auch noch schauen wo lava ist und smarter weise das speichern oder so
 
-
+--  5. Hab gerade rausgefunden man kann mehrere Prozesse gleichzeitig laufen lassen, heißt ein zweiter Prozess der auf eine Nachricht von Demeter wartet und dann evtl return to base triggered wäre nice
 
 
 Start_Time = os.date("%c")
 
-Demeter_ID = 17
-peripheral.find("modem", rednet.open)
-Base_Cords = {}
 
+peripheral.find("modem", rednet.open)
+
+Turtle_State = "IDLE" --IDLE, MINING, RETURNING, REFUELING, EMERGENCY
+Turtle_Mission = "COAL" --Mission der Turtle, wird benutzt um zu wissen was gemined werden soll | "COAL", "IRON", "COPPER", "GOLD", "REDSTONE", "EMERALD", "LAPIS", "DIAMOND", "THORIUM", "ZINC", "STONE", ""
 Target_Depth = -59 --Altes Tiefen system muss überarbeitet werden
 Orientation = 0 --Himmelsrichtung der Turtle, 0 ist die start richtung, wird genutzt um rotation zu tracken
 Tavel_Distance = 0  --Verbleibende Travel Distance
@@ -39,6 +42,7 @@ Resource_Name_List = {"minecraft:coal_ore", --Liste der Resourcen, wird für den
 "create:zinc_ore",
 "create:deepslate_zinc_ore",
 }
+Turtle_movement_nodes = {} --Liste an Nodes die die Turtle schon besucht hat, wird benutzt um den weg zurück zu finden
 
 
 Title = {
@@ -81,6 +85,27 @@ function PrintTitle() --Gibt den Title aus. ACHTUNG manchmal weirder shit mit hi
     --os.sleep(5)
 end
 
+local function write_mission_file(tbl)
+    local file = io.open("Turtle_mission.txt", "w")
+    if file then
+        file:write(textutils.serialize(tbl))
+        file:close()
+    else
+        error("Could not open file for writing")
+    end
+end
+
+local function read_mission_file()
+    local file = io.open("Turtle_mission.txt", "r")
+    if file then
+        local content = file:read("*a")
+        file:close()
+        return textutils.unserialize(content)
+    else
+        error("Could not open file for reading")
+    end
+end
+
 function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene Wert eine Resource ist
     for i = 1,#Resource_Name_List do
       if (Resource_Name_List[i] == value) then
@@ -91,12 +116,26 @@ function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene 
   end
 
 function Contact_Demeter() --Start Kontakt mit Demeter muss auch überarbeitet werden
-    local demeter_message = {Projekt = "Demeter", StartTime = Start_Time, TransmitionTime = os.clock()}
+    local demeter_message = {Projekt = "Demeter", Command = "REGISTER"}
     rednet.send(Demeter_ID, demeter_message)
     print("waiting for msg")
     D_id, D_message = rednet.receive()
     if (D_id == Demeter_ID) then
-        os.setComputerLabel("Slave D-"..D_message[0].."")
+        os.setComputerLabel("Turtle-"..D_message.Mission.."")
+    end
+end
+
+function Update_Demeter() --Update Demeter mit aktuellen Informationen
+    local demeter_message = {Projekt = "Demeter", StartTime = Start_Time, TransmitionTime = os.clock(), Turtle_State = Turtle_State, Mission = Turtle_Mission, Command = "UPDATE", Fuel = Tavel_Distance}
+    rednet.send(Demeter_ID, demeter_message)
+end
+
+function Request_Mission_Demeter() --Request Demeter für aktuelle Mission
+    local demeter_message = {Projekt = "Demeter", Command = "REQUEST"}
+    rednet.send(Demeter_ID, demeter_message)
+    D_id, D_message = rednet.receive()
+    if (D_id == Demeter_ID) then
+        --Evaluate Data from Demeter
     end
 end
 
@@ -127,6 +166,7 @@ function EmptyInventoryintoChest() --Leert das gesamte inventar in eine Kiste vo
 end
 
 function StarterRefuel() --!Ist nur beim Starten der Turtle zu verwenden da hier geschaut wir ob eine Chest vorhanden ist. (Theoretisch auch später möglich i guess)
+    Turtle_State = "REFUELING"
     local clear_inv = false
     for i = 1, 16, 1 do
         turtle.select(i)
@@ -190,13 +230,13 @@ function Calculate_Travel_Distance() --!Ist nur beim Starten der Turtle zu verwe
     Tavel_Distance = cur_fuel / 2
 end
 
-function Mine_Block(Direction) --Direction == "UP" or "DOWN" or "FORWARD"
+function Mine_Block(direction) --Direction == "UP" or "DOWN" or "FORWARD"
     local a1, a2
-    if Direction == "UP" then
+    if direction == "UP" then
         a1, a2 = turtle.digUp()
-    elseif Direction == "DOWN" then
+    elseif direction == "DOWN" then
         a1, a2 = turtle.digDown()
-    elseif Direction == "FORWARD" then
+    elseif direction == "FORWARD" then
         a1, a2 = turtle.dig()
     end
 
@@ -211,36 +251,43 @@ function Mine_Block(Direction) --Direction == "UP" or "DOWN" or "FORWARD"
     
 end
 
-function Movement(Direction)
+function Movement(direction, steps) --Movemint
+    for i = 1, steps, 1 do
+        Tavel_Distance = Tavel_Distance - 1 --Schreibe auf das ein Schritt gegangen wurde
+        if Tavel_Distance <= (Start_Max_Travel_Distance / 2 -5) then --Checke ob MAX Travel Distance erreicht wurde
+            Strip_mine_Contoll = false
+            return false
+            --start Journey back(TODO)
+        end
 
-    Tavel_Distance = Tavel_Distance - 1 --Schreibe auf das ein Schritt gegangen wurde
-    if Tavel_Distance <= (Start_Max_Travel_Distance / 2 -5) then --Checke ob MAX Travel Distance erreicht wurde
-        --start Journey back(TODO)
-    end
+        Check_for_Resources()
 
-    Check_for_Resources()
+        if Mine_Block(direction) == false then
+            --figure out why.... WHYY sollte nicht false sein
+        end
 
-    if Mine_Block(Direction) == false then
-        --figure out why.... WHYY sollte nicht false sein
-    end
-
-    local a1, a2 = true, true
-    if Direction == "UP" then --bisschen fucky code der die Turtle in eine Richtung bewegt, gibt glaube ich 100 wege das besser zu machen aber der hier ist voll cool
-        a1, a2 = turtle.up()
-    elseif Direction == "DOWN" then
-        a1, a2 = turtle.down()
-    elseif Direction == "FORWARD" then
-        a1, a2 = turtle.forward()
-    end
-    if a1 == false then
-        if a2 == "Movement obstructed" then
-            --why was it not mined before?
-        elseif a2 == "Out of Fuel" then
-            --How???
-            --send Emergency Help Call to Zeuz / Demeter kp
+        local a1, a2 = true, true
+        if Direction == "UP" then --bisschen fucky code der die Turtle in eine Richtung bewegt, gibt glaube ich 100 wege das besser zu machen aber der hier ist voll cool
+            a1, a2 = turtle.up()
+        elseif Direction == "DOWN" then
+            a1, a2 = turtle.down()
+        elseif Direction == "FORWARD" then
+            a1, a2 = turtle.forward()
+        end
+        if a1 == false then
+            if a2 == "Movement obstructed" then
+                --why was it not mined before?
+            elseif a2 == "Out of Fuel" then
+                --How???
+                --send Emergency Help Call to Zeuz / Demeter kp
+            end
         end
     end
     return true
+end
+function Add_movement_node()
+    local cur_pos = GetCurPosition()
+    table.insert(Turtle_movement_nodes, cur_pos)
 end
 
 function Mine_Resource_Node(direction) --absolut kp wie das gemacht wird
@@ -291,30 +338,93 @@ function GetCurPosition() --Gibt akuelle Position an (Funktioniert nur wenn ATLA
 
 end
 
-
+function ReturnBase()
+    
+end
 
 function Evade_Bedrock() --huh kp wie
     --evade Bedrock
 end
 
+Strip_mine_Contoll = true --Stripmine Control Variable wird benutzt um das Stripminen zu stoppen
+function Strip_mine_loop()
+    Turtle_State = "MINING"
+    local inv_check_counter = 0
+    while Strip_mine_Contoll do --Muss noch rausfinden wie ich das am einrachsten mache das der Loop sofort abgebrochen wird wenn Strip_mine_Contoll auf false gesetzt wird        
+        Movement("FORWARD", 2)
+        turtle.turnLeft()
+        Movement("FORWARD", 5)
+        turtle.turnRight()
+        turtle.turnRight()
+        Movement("FORWARD", 10)
+        turtle.turnLeft()
+        turtle.turnLeft()
+        Movement("FORWARD", 5)
+        turtle.turnRight()
+
+        if inv_check_counter == 10 then
+            inv_check_counter = 0
+            --Check Inventory
+            --Wenn voll dann zurück zur Base und Strip_mine_Contoll auf false setzen
+        end
+    end
+    ReturnBase()
+end
+
+function Get_in_start_Position() --Fährt auf die Start(Mining) Position
+    Navigate_to_height()
+    --in richtige Richtung drehen
+end
+
 function Navigate_to_height() --Auf Start Positions Höhe fahren
     while true do
         if GetCurPosition()[1] ~= Target_Depth then
-            Movement("DOWN")
+            Movement("DOWN", 1)
         else
+            Add_movement_node()
             break
         end
     end
 
 end
 
+function Clear_longterm_Storage() --Löscht die Longterm Storage Datei
+    local clear_table = {}
+    write_mission_file(clear_table)
+end
+
+function Setup()
+    os.setComputerLabel("Initiating...")
+    Contact_Demeter()
+    Add_movement_node()
+    StarterRefuel()
+    Calculate_Travel_Distance()
+
+    Update_Demeter()
+end
+
 --PrintTitle()
---Contact_Demeter()
---Calc_Orientation_Depth()
-StarterRefuel()
---Calculate_Travel_Distance()
---Base_Cords = GetStartPosition()
-
+--Setup()
 --Navigate_to_height()
+--Strip_mine_loop() --Starte Stripmine Prozess
 
 
+
+
+
+
+
+
+
+
+
+--Calc_Orientation_Depth()
+
+
+
+
+
+
+
+--Clear_longterm_Storage()
+--aktuell ist es einfacher wenn die Turtle fertig ist mit einem Mining durchgang sie neu zu starten und ihr dann wieder ein Ziel zu geben

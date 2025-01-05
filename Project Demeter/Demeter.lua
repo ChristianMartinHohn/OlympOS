@@ -1,12 +1,13 @@
---Muss Reworked werden!!!
+--Muss Reworked werden!!! ✓
 --Aktuelle Hauptfunktion ist das Loggen von Turtles und deren Namen zuweisung
 
 --TODO
 --Ich muss mir dringend anschauen wie man eine Table in einer Datei speichert und die dann später wieder ausließt... wäre relativ wichtig für das Projekt
---Actually ziemlich nice von CoPilot aber KP ob das funktioniert
+--Actually ziemlich nice von CoPilot aber KP ob das funktioniert --FUNKTIONIERT LES GOOO
+
+Turtle_List = {}
 
 
---CoPilot solution:
 local function save_table_to_file(tbl, filename)
     local file = io.open(filename, "w")
     if file then
@@ -16,12 +17,6 @@ local function save_table_to_file(tbl, filename)
         error("Could not open file for writing: " .. filename)
     end
 end
-
--- Example usage
-local myTable = {name = "Turtle1", id = 1, tasks = {"mine", "build"}}
-save_table_to_file(myTable, "disk/myTable.txt")
-
-
 
 local function read_table_from_file(filename)
     local file = io.open(filename, "r")
@@ -34,16 +29,7 @@ local function read_table_from_file(filename)
     end
 end
 
--- Example usage
-local loadedTable = read_table_from_file("disk/myTable.txt")
-print(loadedTable.name)  -- Output: Turtle1
-
-
-
-
 peripheral.find("modem", rednet.open)
-
-
 
 Title = {
     '                                                   ',
@@ -68,9 +54,6 @@ Title = {
     '                                                   ',
 }
 
-os.setComputerLabel("Demeter")
-
-
 function PrintTitle()
     term.clear()
     for y_offset, line in pairs(Title) do
@@ -93,47 +76,10 @@ function PrintTitle()
     term.setBackgroundColor(colors.black)
 end
 
-PrintTitle()
-
-
 local function file_exists(file)
     local f = io.open(file, "rb")
     if f then f:close() end
     return f ~= nil
-end
-
---Drone Iteration und Slave List müssen noch zusammengefügt werden und dann in einer Datei gespeicher, aktuell werden die in zwei unterschiedlichen gespeicher. Außerdem muss ich mir noch anschauen wie man Tables in einer File speichert und dann wieder richtig lädt
-
-function Read_Drone_Iteration()
-    if not file_exists("disk/Drone_Iteration.txt") then 
-        local f = io.open("disk/Drone_Iteration.txt", "w")
-        if f ~= nil then
-            f:write("0")
-            f:close()
-        end
-    end
-
-    local lines = {}
-    for line in io.lines("disk/Drone_Iteration.txt") do
-        lines[#lines + 1] = line
-    end
-    return lines[0]
-end
-
-function Read_Slave_List()
-    if not file_exists("disk/Slave_List.txt") then 
-        local f = io.open("disk/Slave_List.txt", "w")
-        if f ~= nil then
-            f:write("0")
-            f:close()
-        end
-    end
-
-    local lines = {}
-    for line in io.lines("disk/Slave_List.txt") do
-        lines[#lines + 1] = line
-    end
-    return lines
 end
 
 function Check_Turtle_FuelChest()
@@ -150,19 +96,50 @@ function Check_Active_Turtles()
     --Evtl evaluieren ob weitere gestarten werden sollen
 end
 
+function Load_old_Lists()
+    Turtle_List = read_table_from_file("Turtle_List.txt")
+end
 
---Drone_Iteration = Read_Drone_Iteration()
---Slave_List = Read_Slave_List()
+function Save_Turtle_List()
+    save_table_to_file(Turtle_List, "Turtle_List.txt")
+end
 
+function Assign_Turtle_Mission() --WICHTIG muss noch überlegen wann welche Resource benötigt wird
+    --Check wie viele Turtles gerade Aktiv sind
+    --Wenn zu wenig Turtles in einer Categorie aktiv sind, return Mission
+    return "IRON" --tmp
+end
 
---print("waiting for msg")
---local id, message = rednet.receive()
---if (message) then
---    if (message.Projekt == "Demeter") then
---        Slave_List[id] = message
---        local awnser = {}
---        awnser[#awnser] = #Slave_List
---        rednet.send(id, awnser)      
---    end
---end
+function Assign_Turtle_Area_Orientation() --WICHTIG muss noch überlegen wann welche Resource benötigt wird
+    --Check wie viele Turtles gerade Aktiv sind
+    --Wenn zu wenig Turtles in einer Categorie aktiv sind, return Mission
+    return {height = 57, orientation = 0} --tmp height = Höhe auf der Ge-Mined werden soll, orientation = 0 Anzahl der Drehungen(Himmelsrichtung)
+end
+
+Load_old_Lists()
+
+os.setComputerLabel("Demeter")
+PrintTitle()
+
+while true do --warte auf Nachrichten Loop
+    local id, message = rednet.receive()
+    if (message) then
+        if (message.Projekt == "Demeter") then --Check if message is from a Project Demeter member
+            if message.Command == "REGISTER" then --Register a new Turtle
+                local mission = Assign_Turtle_Mission()
+                local awnser = {Mission = mission, HaO = Assign_Turtle_Area_Orientation()}
+                rednet.send(id, awnser)
+                local turtle = {Mission = mission}
+                Turtle_List[id] = turtle
+                Save_Turtle_List()
+            elseif message.Command == "UPDATE" then --Update the Turtle List with the new Information
+                Turtle_List[id] = message
+                Save_Turtle_List()
+            elseif message.Command == "REQUEST" then --Request Information from the Turtle List
+                local awnser = Turtle_List[id]
+                rednet.send(id, awnser)
+            end
+        end
+    end
+end
 
