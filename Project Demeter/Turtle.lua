@@ -113,15 +113,15 @@ function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene 
       end
     end
     return false
-  end
+end
 
-function Contact_Demeter() --Start Kontakt mit Demeter muss auch überarbeitet werden
+function First_Contact_Demeter() --First Contact mit Demeter, wird benutzt um Turtle Mission zu bekommen
     local demeter_message = {Projekt = "Demeter", Command = "REGISTER"}
     rednet.send(Demeter_ID, demeter_message)
-    print("waiting for msg")
     D_id, D_message = rednet.receive()
     if (D_id == Demeter_ID) then
         os.setComputerLabel("Turtle-"..D_message.Mission.."")
+        --Irgendwie Mission setzen
     end
 end
 
@@ -248,7 +248,6 @@ function Mine_Block(direction) --Direction == "UP" or "DOWN" or "FORWARD"
     else
         return true
     end
-    
 end
 
 function Movement(direction, steps) --Movemint
@@ -285,12 +284,18 @@ function Movement(direction, steps) --Movemint
     end
     return true
 end
+
 function Add_movement_node()
     local cur_pos = GetCurPosition()
     table.insert(Turtle_movement_nodes, cur_pos)
 end
 
 function Mine_Resource_Node(direction) --absolut kp wie das gemacht wird
+    local resource_start_point = GetCurPosition()
+    local custom_resource_map = {}
+    if direction == "FORWARD" then
+        Movement("FORWARD", 1)
+    end
 end
 
 function Check_for_Resources() --Einen full spin um zu schauen ob Rescourcen in der Nähe sind
@@ -395,10 +400,12 @@ end
 
 function Setup()
     os.setComputerLabel("Initiating...")
-    Contact_Demeter()
+    First_Contact_Demeter()
     Add_movement_node()
     StarterRefuel()
     Calculate_Travel_Distance()
+
+    Get_in_start_Position()
 
     Update_Demeter()
 end
@@ -428,3 +435,5 @@ end
 
 --Clear_longterm_Storage()
 --aktuell ist es einfacher wenn die Turtle fertig ist mit einem Mining durchgang sie neu zu starten und ihr dann wieder ein Ziel zu geben
+
+
