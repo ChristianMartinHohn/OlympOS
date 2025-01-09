@@ -125,6 +125,7 @@ local function saveProgress()
         ["Turtle_State"] = Turtle_State,
         ["Fuel_Percent"] = getFuelPercent(),
         ["Current_Position"] = gps.locate(),
+        ["DemeterID"] = DemeterID
     }
     write_mission_file(saveData)
 end
@@ -181,7 +182,7 @@ local function setup()
 
     write("Please enter the ID of the Demter Serer: \n")
     write("> ")
-    local serverID = read()
+    DemeterID = read()
 
     while true do
         write("What resource should the turtle mine? \n")
