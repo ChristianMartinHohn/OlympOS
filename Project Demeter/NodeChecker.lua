@@ -54,10 +54,8 @@ NodeChecker.new = function()
 
                 if not alreadyExists then
                     table.insert(resourceNodeCoordinates, vector.new(x, y, z))
-                    logger.log("debug", "Coordinates before sorting: " .. textutils.serialize(resourceNodeCoordinates))
-                    sortCoordinates()
-                    logger.log("debug", "Coordinates after sorting: " .. textutils.serialize(resourceNodeCoordinates))
                     logger.log("info", "Added new resource node coordinates: (" .. x .. ", " .. y .. ", " .. z .. ")")
+                    -- sortCoordinates()
                 end
             end
         end
@@ -80,9 +78,7 @@ NodeChecker.new = function()
 
                 if not alreadyExists then
                     table.insert(resourceNodeCoordinates, vector.new(x, y + 1, z))
-                    logger.log("debug", "Coordinates before sorting: " .. textutils.serialize(resourceNodeCoordinates))
-                    sortCoordinates()
-                    logger.log("debug", "Coordinates after sorting: " .. textutils.serialize(resourceNodeCoordinates))
+                    -- sortCoordinates()
                     logger.log("info", "Added new resource node coordinates: (" .. x .. ", " .. (y + 1) .. ", " .. z .. ")")
                 end
             end
@@ -106,9 +102,7 @@ NodeChecker.new = function()
 
                 if not alreadyExists then
                     table.insert(resourceNodeCoordinates, vector.new(x, y - 1, z))
-                    logger.log("debug", "Coordinates before sorting: " .. textutils.serialize(resourceNodeCoordinates))
-                    sortCoordinates()
-                    logger.log("debug", "Coordinates after sorting: " .. textutils.serialize(resourceNodeCoordinates))
+                    -- sortCoordinates()
                     logger.log("info", "Added new resource node coordinates: (" .. x .. ", " .. (y - 1) .. ", " .. z .. ")")
                 end
             end
@@ -180,9 +174,7 @@ NodeChecker.new = function()
 
                     if not alreadyExists then
                         table.insert(resourceNodeCoordinates, vector.new(x, y, z))
-                        logger.log("debug", "Coordinates before sorting: " .. textutils.serialize(resourceNodeCoordinates))
-                        sortCoordinates()
-                        logger.log("debug", "Coordinates after sorting: " .. textutils.serialize(resourceNodeCoordinates))
+                        -- sortCoordinates()
                         logger.log("info", "Added new resource node coordinates: (" .. x .. ", " .. y .. ", " .. z .. ")")
                     end
                 end
@@ -208,9 +200,7 @@ NodeChecker.new = function()
 
                 if not alreadyExists then
                     table.insert(resourceNodeCoordinates, vector.new(x, y + 1, z))
-                    logger.log("debug", "Coordinates before sorting: " .. textutils.serialize(resourceNodeCoordinates))
-                    sortCoordinates()
-                    logger.log("debug", "Coordinates after sorting: " .. textutils.serialize(resourceNodeCoordinates))
+                    -- sortCoordinates()
                     logger.log("info", "Added new resource node coordinates: (" .. x .. ", " .. (y + 1) .. ", " .. z .. ")")
                 end
             end
@@ -232,9 +222,7 @@ NodeChecker.new = function()
 
                 if not alreadyExists then
                     table.insert(resourceNodeCoordinates, vector.new(x, y - 1, z))
-                    logger.log("debug", "Coordinates before sorting: " .. textutils.serialize(resourceNodeCoordinates))
-                    sortCoordinates()
-                    logger.log("debug", "Coordinates after sorting: " .. textutils.serialize(resourceNodeCoordinates))
+                    -- sortCoordinates()
                     logger.log("info", "Added new resource node coordinates: (" .. x .. ", " .. (y - 1) .. ", " .. z .. ")")
                 end
             end
@@ -325,7 +313,7 @@ NodeChecker.new = function()
 
     function self.resourceValid(blockName)
         for _, resource in ipairs(ResourceNameList) do
-            if blockName.find(resource, blockName) then
+            if resource == blockName then
                 return resource
             end
         end

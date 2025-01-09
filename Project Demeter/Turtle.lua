@@ -21,7 +21,7 @@ ResourceNameList = {
     "minecraft:diamond_ore",
     "minecraft:deepslate_diamond_ore",
     "create_new_age:thorium_ore",
-    "create_new_age:magneite_block",
+    "create_new_age:magnetite_block",
     "create:zinc_ore",
     "create:deepslate_zinc_ore",
 }
@@ -215,6 +215,8 @@ local function setup()
     elseif z2 < z then
         Orientation = 0
     end
+
+    move.back()
 
     logger.log("info", "Orientation is " .. Orientation)
 
