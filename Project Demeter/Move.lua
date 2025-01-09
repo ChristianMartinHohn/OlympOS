@@ -77,10 +77,25 @@ Move.new = function ()
     end
 
     function move()
-        a1, a2 = turtle.forward()
-        if a1 == false then
-            logger.log("error", a2)
-            return false
+        local success, reason = turtle.forward()
+        if not success then
+            logger.log("error", reason)
+
+            -- If the reason he cant move is because it is obstructed, check the obstruction.
+            -- If the obstruction is gravel or sand, dig it and try to move again.
+            -- Loop this until the turtle can move again.
+            while reason == "Movement obstructed" do
+                local success, data = turtle.inspect()
+                if success then
+                    if data.name == "minecraft:gravel" or data.name == "minecraft:sand" then
+                        turtle.dig()
+                        success, reason = turtle.forward()
+                        if success then
+                            break
+                        end
+                    end
+                end
+            end
         end
         
         Travel_Distance = Travel_Distance - 1

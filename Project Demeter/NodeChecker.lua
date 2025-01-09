@@ -8,7 +8,7 @@ NodeChecker.new = function()
     local isMining = false
 
     local function sortCoordinates()
-        local currentX, currentY, currentZ = gps.locate()
+        local currentX, currentY, currentZ = self.getCurPosition()
         logger.log("debug", "Sorting coordinates based on current position: (" .. currentX .. ", " .. currentY .. ", " .. currentZ .. ")")
         for _, coord in ipairs(resourceNodeCoordinates) do
             logger.log("debug", "Before sort: (" .. coord.x .. ", " .. coord.y .. ", " .. coord.z .. ")")
@@ -29,7 +29,7 @@ NodeChecker.new = function()
         if success then
             if self.resourceValid(data.name) then
                 logger.log("info", "Found resource node in front: " .. data.name)
-                local x, y, z = gps.locate()
+                local x, y, z = self.getCurPosition()
 
                 -- Save the resource node position
                 -- Change the coords based on the orientation
@@ -67,7 +67,7 @@ NodeChecker.new = function()
             if self.resourceValid(data.name) then
                 logger.log("info", "Found resource node above: " .. data.name)
 
-                local x, y, z = gps.locate()
+                local x, y, z = self.getCurPosition()
 
                 -- Check if the coordinates are already in the list
                 local alreadyExists = false
@@ -93,7 +93,7 @@ NodeChecker.new = function()
             if self.resourceValid(data.name) then
                 logger.log("info", "Found resource node below: " .. data.name)
 
-                local x, y, z = gps.locate()
+                local x, y, z = self.getCurPosition()
 
                 -- Check if the coordinates are already in the list
                 local alreadyExists = false
@@ -122,9 +122,8 @@ NodeChecker.new = function()
             isMining = false
         end
 
-        
         -- Reset global variables
-        resourceNodeCoordinates = {}
+        -- resourceNodeCoordinates = {}
         StartPos = nil
         StartOrtion = nil
         os.setComputerLabel("Stripmining for " .. MineForResource)
@@ -132,7 +131,7 @@ NodeChecker.new = function()
 
     function self.mineResourceNodes()
         -- Save the current position
-        local x, y, z = gps.locate()
+        local x, y, z = self.getCurPosition()
         StartPos = vector.new(x, y, z)
         StartOrtion = Orientation
         logger.log("info", "Saved current position: (" .. x .. ", " .. y .. ", " .. z .. ")")
@@ -146,7 +145,6 @@ NodeChecker.new = function()
         end
 
         -- Move back to the starting position
-        logger.log("info", "Done mining Resource Node! Moving back to starting position")
         self.moveToCoords(StartPos.x, StartPos.y, StartPos.z)
         self.turnTo(StartOrtion)
     end
@@ -157,7 +155,7 @@ NodeChecker.new = function()
             local success, data = turtle.inspect()
             if success then
                 if self.resourceValid(data.name) then
-                    local x, y, z = gps.locate()
+                    local x, y, z = self.getCurPosition()
 
                     -- Save the resource node position
                     -- Change the coords based on the orientation
@@ -197,7 +195,7 @@ NodeChecker.new = function()
         local success, data = turtle.inspectUp()
         if success then
             if self.resourceValid(data.name) then
-                local x, y, z = gps.locate()
+                local x, y, z = self.getCurPosition()
 
                 -- Check if the coordinates are already in the list
                 local alreadyExists = false
@@ -221,7 +219,7 @@ NodeChecker.new = function()
         success, data = turtle.inspectDown()
         if success then
             if self.resourceValid(data.name) then
-                local x, y, z = gps.locate()
+                local x, y, z = self.getCurPosition()
 
                 -- Check if the coordinates are already in the list
                 local alreadyExists = false
@@ -245,7 +243,7 @@ NodeChecker.new = function()
 
     -- This function is used to move the turtle to the saved coordinates
     function self.moveToCoords(x, y, z)
-        local currentX, currentY, currentZ = gps.locate()
+        local currentX, currentY, currentZ = self.getCurPosition()
         local xDiff = x - currentX
         local yDiff = y - currentY
         local zDiff = z - currentZ
@@ -303,16 +301,57 @@ NodeChecker.new = function()
 
     function self.forward()
         turtle.dig()
-        turtle.forward()
+        local success, reason = turtle.forward()
+        if not success then
+            logger.log("error", reason)
+
+            -- If the reason he cant move is because it is obstructed, check the obstruction.
+            -- If the obstruction is gravel or sand, dig it and try to move again.
+            -- Loop this until the turtle can move again.
+            while reason == "Movement obstructed" do
+                local success, data = turtle.inspect()
+                if success then
+                    if data.name == "minecraft:gravel" or data.name == "minecraft:sand" then
+                        turtle.dig()
+                        success, reason = turtle.forward()
+                        if success then
+                            break
+                        end
+                    end
+                end
+            end
+        end
     end
 
-    function self.resourceValid(string)
+    function self.resourceValid(blockName)
         for _, resource in ipairs(ResourceNameList) do
-            if string.find(resource, string) then
+            if blockName.find(resource, blockName) then
                 return resource
             end
         end
         return false
+    end
+
+    function self.getCurPosition()
+        local x, y, z = gps.locate()
+        if not x or not y or not z then
+            logger.log("error", "GPS not found. Cannot get current position.")
+            for i = 1, 3 do
+                logger.log("error", "Trying to get GPS location again..." .. i .. "/3")
+                x, y, z = gps.locate()
+                if x and y and z then
+                    logger.log("info", "GPS location found.")
+                    break
+                end
+            end
+
+            -- If still not found, abort the program
+            Turtle_State = "EMERGENCY"
+            logger.log("error", "GPS location not found. Aborting the program.")
+            -- send help to Demeter Server
+
+        end
+        return x, y, z
     end
 
     self.check = check
