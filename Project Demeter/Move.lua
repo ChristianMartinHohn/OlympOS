@@ -39,40 +39,48 @@ Move.new = function ()
 
     local function back()
         turtle.turnLeft()
+        Orientation = (Orientation - 1) % 4
         nodeChecker.check()
 
         turtle.turnLeft()
+        Orientation = (Orientation - 1) % 4
         nodeChecker.check()
 
         turtle.dig()
         self.move()
 
         turtle.turnLeft()
+        Orientation = (Orientation - 1) % 4
         nodeChecker.check()
         
         turtle.turnLeft()
+        Orientation = (Orientation - 1) % 4
         nodeChecker.check()
     end
 
     local function left()
         turtle.turnLeft()
+        Orientation = (Orientation - 1) % 4
         nodeChecker.check()
 
         turtle.dig()
         self.move()
 
         turtle.turnRight()
+        Orientation = (Orientation + 1) % 4
         nodeChecker.check()
     end
 
     local function right()
         turtle.turnRight()
+        Orientation = (Orientation + 1) % 4
         nodeChecker.check()
 
         turtle.dig()
-        turtle.forward()
+        self.move()
 
         turtle.turnLeft()
+        Orientation = (Orientation - 1) % 4
         nodeChecker.check()
     end
 

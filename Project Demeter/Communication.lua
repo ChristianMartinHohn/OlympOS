@@ -7,12 +7,12 @@ Comms.new = function ()
     local logger = Logger.new()
     peripheral.find("modem", rednet.open)
 
-    function Send_Update(custom_transmittion)
-        local msg = create_msg(custom_transmittion)
+    local function Send_Update(custom_transmittion)
+        local msg = self.create_msg(custom_transmittion)
         rednet.send(DemeterID, msg)
     end
 
-    local function create_msg(custom_transmittion)
+    function self.create_msg(custom_transmittion)
         if custom_transmittion == nil then
             custom_transmittion = ""
         end
@@ -31,10 +31,7 @@ Comms.new = function ()
     end
 
     -- Public Methods
-    self.create_msg = create_msg
-
-    -- Private Methods
-    self.contact = contact
+    self.Send_Update = Send_Update
 
     return self
 end
