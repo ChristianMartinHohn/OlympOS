@@ -52,6 +52,7 @@ Travel_Distance = 0
 Base_Position = {0, 0, 0}
 Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
+Debug = true
 
 local move = Move.new()
 local logger = Logger.new()
@@ -130,6 +131,7 @@ end
 local function stripmine()
     setTurtleState("MINING")
     logger.log("info", "Starting strip mining")
+    os.setComputerLabel("Stripmining for " .. MineForResource)
 
     while true do
         -- Check if the turtle has enough fuel
@@ -163,6 +165,8 @@ end
 
 local function setup()
     local fuelLevel = turtle.getFuelLevel()
+
+    -- Danke Chris ^^
     if fuelLevel == 0 then
         write("DENNIS MACH FUEL REIN \n")
         write("> ")
