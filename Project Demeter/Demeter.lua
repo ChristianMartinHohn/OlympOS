@@ -23,9 +23,9 @@ local function read_table_from_file(filename)
     if file then
         local content = file:read("*a")
         file:close()
-        return textutils.unserialize(content)
+        return textutils.unserialize(content) or {} -- Leere Tabelle zurückgeben wenn Datei leer/ungültig
     else
-        error("Could not open file for reading: " .. filename)
+        return {} -- Leere Tabelle zurückgeben wenn Datei nicht existiert
     end
 end
 
@@ -97,7 +97,11 @@ function Check_Active_Turtles()
 end
 
 function Load_old_Lists()
-    Turtle_List = read_table_from_file("Turtle_List.txt")
+    if file_exists("Turtle_List.txt") then
+        Turtle_List = read_table_from_file("Turtle_List.txt")
+    else
+        Turtle_List = {} -- Initialisiere leere Tabelle wenn Datei nicht existiert
+    end
 end
 
 function Save_Turtle_List()
@@ -116,6 +120,7 @@ function Assign_Turtle_Area_Orientation() --WICHTIG muss noch überlegen wann we
     return {height = 57, orientation = 0} --tmp height = Höhe auf der Ge-Mined werden soll, orientation = 0 Anzahl der Drehungen(Himmelsrichtung)
 end
 
+Turtle_List = {} -- Initialisiere Turtle_List vor dem Laden
 Load_old_Lists()
 
 os.setComputerLabel("Demeter")
@@ -123,6 +128,7 @@ PrintTitle()
 
 while true do --warte auf Nachrichten Loop
     local id, message = rednet.receive()
+    print(id)
     if (message) then
         if (message.Projekt == "Demeter") then --Check if message is from a Project Demeter member
             if message.Command == "REGISTER" then --Register a new Turtle
@@ -142,4 +148,3 @@ while true do --warte auf Nachrichten Loop
         end
     end
 end 
-

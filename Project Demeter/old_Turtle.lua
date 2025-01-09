@@ -1,4 +1,4 @@
-Demeter_ID = 17 --ID des Demeter Computers ✓
+Demeter_ID = 7 --ID des Demeter Computers ✓
 
 --Ding ist ich hab glaube ich ein bisschen falsch kalkuliert mit der farming höhe und allem, denke das wäre besser wenn der Turtle gesagt wird geh auf die höhe
 -- und mine dann die Rescource, weil aktuell würden die sich von Bedrock langsam Hoch arbeiten.
@@ -22,25 +22,26 @@ Target_Depth = -59 --Altes Tiefen system muss überarbeitet werden
 Orientation = 0 --Himmelsrichtung der Turtle, 0 ist die start richtung, wird genutzt um rotation zu tracken
 Tavel_Distance = 0  --Verbleibende Travel Distance
 Start_Max_Travel_Distance = 0 --MAX Travel Distance bevor umgedreht werden muss weil zu wenig fuel da ist
-Resource_Name_List = {"minecraft:coal_ore", --Liste der Resourcen, wird für den Resourcen checker gebraucht
-"minecraft:deepslate_coal_ore", 
-"minecraft:iron_ore",
-"minecraft:deepslate_iron_ore",
-"minecraft:copper_ore",
-"minecraft:deepslate_copper_ore",
-"minecraft:gold_ore",
-"minecraft:deepslate_gold_ore",
-"minecraft:redstone_ore", 
-"minecraft:deepslate_redstone_ore", 
-"minecraft:emerald_ore",
-"minecraft:deepslate_emerald_ore",
-"minecraft:lapis_ore",
-"minecraft:deepslate_lapis_ore",
-"minecraft:diamond_ore",
-"minecraft:deepslate_diamond_ore",
-"create_new_age:thorium_ore",
-"create:zinc_ore",
-"create:deepslate_zinc_ore",
+Resource_Name_List = {
+    "minecraft:coal_ore", --Liste der Resourcen, wird für den Resourcen checker gebraucht
+    "minecraft:deepslate_coal_ore", 
+    "minecraft:iron_ore",
+    "minecraft:deepslate_iron_ore",
+    "minecraft:copper_ore",
+    "minecraft:deepslate_copper_ore",
+    "minecraft:gold_ore",
+    "minecraft:deepslate_gold_ore",
+    "minecraft:redstone_ore", 
+    "minecraft:deepslate_redstone_ore", 
+    "minecraft:emerald_ore",
+    "minecraft:deepslate_emerald_ore",
+    "minecraft:lapis_ore",
+    "minecraft:deepslate_lapis_ore",
+    "minecraft:diamond_ore",
+    "minecraft:deepslate_diamond_ore",
+    "create_new_age:thorium_ore",
+    "create:zinc_ore",
+    "create:deepslate_zinc_ore",
 }
 Turtle_movement_nodes = {} --Liste an Nodes die die Turtle schon besucht hat, wird benutzt um den weg zurück zu finden
 
@@ -266,11 +267,14 @@ function Movement(direction, steps) --Movemint
         end
 
         local a1, a2 = true, true
-        if Direction == "UP" then --bisschen fucky code der die Turtle in eine Richtung bewegt, gibt glaube ich 100 wege das besser zu machen aber der hier ist voll cool
+        if direction == "UP" then --bisschen fucky code der die Turtle in eine Richtung bewegt, gibt glaube ich 100 wege das besser zu machen aber der hier ist voll cool
+            print("[INFO] Moving UP")
             a1, a2 = turtle.up()
-        elseif Direction == "DOWN" then
+        elseif direction == "DOWN" then
+            print("[INFO] Moving Down")
             a1, a2 = turtle.down()
-        elseif Direction == "FORWARD" then
+        elseif direction == "FORWARD" then
+            print("[INFO] Moving FORWARD")
             a1, a2 = turtle.forward()
         end
         if a1 == false then
@@ -288,14 +292,6 @@ end
 function Add_movement_node()
     local cur_pos = GetCurPosition()
     table.insert(Turtle_movement_nodes, cur_pos)
-end
-
-function Mine_Resource_Node(direction) --absolut kp wie das gemacht wird
-    local resource_start_point = GetCurPosition()
-    local custom_resource_map = {}
-    if direction == "FORWARD" then
-        Movement("FORWARD", 1)
-    end
 end
 
 function Check_for_Resources() --Einen full spin um zu schauen ob Rescourcen in der Nähe sind
@@ -317,7 +313,7 @@ function Check_for_Resources() --Einen full spin um zu schauen ob Rescourcen in 
         if turtle.detect() == true then
             p1, p2 = turtle.inspect()
             if(IsResource(p2["name"])) then
-                Mine_Resource_Node("FRONT")
+                Mine_Resource_Node("FORWARD")
             end
         end
 
@@ -383,6 +379,7 @@ end
 
 function Navigate_to_height() --Auf Start Positions Höhe fahren
     while true do
+        print(GetCurPosition()[1])
         if GetCurPosition()[1] ~= Target_Depth then
             Movement("DOWN", 1)
         else
@@ -410,10 +407,225 @@ function Setup()
     Update_Demeter()
 end
 
---PrintTitle()
---Setup()
---Navigate_to_height()
---Strip_mine_loop() --Starte Stripmine Prozess
+
+
+
+
+function Mine_Resource_Node(direction)
+    -- Startposition speichern
+    local startPos = GetCurPosition()
+    local startOrientation = Orientation
+
+    print("[INFO] Checking for Resource Node")
+    
+    -- Resource Map erstellen mit relativen Koordinaten
+    local resourceMap = {
+        checked = {},
+        toCheck = {{x=0, y=0, z=0}} -- Relative Position zum Startpunkt
+    }
+    
+    -- Wenn die Ressource vor uns ist, einen Schritt nach vorne
+    if direction == "FORWARD" then
+        mineForward()
+    end
+    
+    -- Ressourcen-Cluster abbauen
+    while #resourceMap.toCheck > 0 do
+        local currentBlock = table.remove(resourceMap.toCheck)
+        local key = currentBlock.x..","..currentBlock.y..","..currentBlock.z
+        
+        if not resourceMap.checked[key] then
+            resourceMap.checked[key] = true
+            
+            -- Zur Position navigieren
+            local currentPos = GetCurPosition()
+            
+            -- Y-Position
+            while currentPos[2] < startPos[2] + currentBlock.y do Movement("UP", 1) currentPos = GetCurPosition() end
+            while currentPos[2] > startPos[2] + currentBlock.y do Movement("DOWN", 1) currentPos = GetCurPosition() end
+            
+            -- X-Position
+            while currentPos[1] < startPos[1] + currentBlock.x do
+                while Orientation ~= 1 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+                mineForward()
+                currentPos = GetCurPosition()
+            end
+            while currentPos[1] > startPos[1] + currentBlock.x do
+                while Orientation ~= 3 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+                mineForward()
+                currentPos = GetCurPosition()
+            end
+            
+            -- Z-Position
+            while currentPos[3] < startPos[3] + currentBlock.z do
+                while Orientation ~= 2 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+                mineForward()
+                currentPos = GetCurPosition()
+            end
+            while currentPos[3] > startPos[3] + currentBlock.z do
+                while Orientation ~= 0 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+                mineForward()
+                currentPos = GetCurPosition()
+            end
+            
+            -- Block scannen und abbauen
+            local success, data = inspectCurrentBlock(direction)
+            if success and IsResource(data.name) then
+                Mine_Block(direction)
+                
+                -- Nachbarblöcke zur Prüfung hinzufügen
+                addNeighborsToCheck(currentBlock, resourceMap)
+            end
+        end
+    end
+    
+    -- Zurück zur Startposition
+    local currentPos = GetCurPosition()
+    if currentPos[1] ~= startPos[1] or currentPos[2] ~= startPos[2] or currentPos[3] ~= startPos[3] then
+        -- Y-Position
+        while currentPos[2] < startPos[2] do Movement("UP", 1) currentPos = GetCurPosition() end
+        while currentPos[2] > startPos[2] do Movement("DOWN", 1) currentPos = GetCurPosition() end
+        
+        -- X-Position
+        while currentPos[1] < startPos[1] do
+            while Orientation ~= 1 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            Movement("FORWARD", 1)
+            currentPos = GetCurPosition()
+        end
+        while currentPos[1] > startPos[1] do
+            while Orientation ~= 3 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            Movement("FORWARD", 1)
+            currentPos = GetCurPosition()
+        end
+        
+        -- Z-Position
+        while currentPos[3] < startPos[3] do
+            while Orientation ~= 2 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            Movement("FORWARD", 1)
+            currentPos = GetCurPosition()
+        end
+        while currentPos[3] > startPos[3] do
+            while Orientation ~= 0 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            Movement("FORWARD", 1)
+            currentPos = GetCurPosition()
+        end
+    end
+    
+    -- Ursprüngliche Orientierung wiederherstellen
+    while Orientation ~= startOrientation do
+        turtle.turnRight()
+        Orientation = (Orientation + 1) % 4
+    end
+end
+
+-- Hilfsfunktionen
+function navigateToRelativePos(pos)
+    -- Y-Bewegung
+    while pos.y > 0 do turtle.up() pos.y = pos.y - 1 end
+    while pos.y < 0 do turtle.down() pos.y = pos.y + 1 end
+    
+    -- X-Bewegung
+    while pos.x > 0 do
+        while Orientation ~= 1 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+        turtle.forward()
+        pos.x = pos.x - 1
+    end
+    while pos.x < 0 do
+        while Orientation ~= 3 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+        turtle.forward()
+        pos.x = pos.x + 1
+    end
+    
+    -- Z-Bewegung
+    while pos.z > 0 do
+        while Orientation ~= 2 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+        turtle.forward()
+        pos.z = pos.z - 1
+    end
+    while pos.z < 0 do
+        while Orientation ~= 0 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+        turtle.forward()
+        pos.z = pos.z + 1
+    end
+end
+
+function inspectCurrentBlock(direction)
+    if direction == "UP" then return turtle.inspectUp()
+    elseif direction == "DOWN" then return turtle.inspectDown()
+    else return turtle.inspect() end
+end
+
+function addNeighborsToCheck(pos, resourceMap)
+    local neighbors = {
+        {x=pos.x+1, y=pos.y, z=pos.z},
+        {x=pos.x-1, y=pos.y, z=pos.z},
+        {x=pos.x, y=pos.y+1, z=pos.z},
+        {x=pos.x, y=pos.y-1, z=pos.z},
+        {x=pos.x, y=pos.y, z=pos.z+1},
+        {x=pos.x, y=pos.y, z=pos.z-1}
+    }
+    
+    for _, neighbor in ipairs(neighbors) do
+        local key = neighbor.x..","..neighbor.y..","..neighbor.z
+        if not resourceMap.checked[key] then
+            table.insert(resourceMap.toCheck, neighbor)
+        end
+    end
+end
+
+function returnToStartPos(startPos)
+    local x, y, z = gps.locate()
+    if x then
+        -- Zurück zur Startposition navigieren
+        while y < startPos.y do turtle.up() y = y + 1 end
+        while y > startPos.y do turtle.down() y = y - 1 end
+        
+        while x < startPos.x do
+            while Orientation ~= 1 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            turtle.forward()
+            x = x + 1
+        end
+        while x > startPos.x do
+            while Orientation ~= 3 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            turtle.forward()
+            x = x - 1
+        end
+        
+        while z < startPos.z do
+            while Orientation ~= 2 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            turtle.forward()
+            z = z + 1
+        end
+        while z > startPos.z do
+            while Orientation ~= 0 do turtle.turnRight() Orientation = (Orientation + 1) % 4 end
+            turtle.forward()
+            z = z - 1
+        end
+        
+        -- Ursprüngliche Orientierung wiederherstellen
+        while Orientation ~= startPos.orientation do
+            turtle.turnRight()
+            Orientation = (Orientation + 1) % 4
+        end
+    end
+end
+
+function mineForward() 
+    Tavel_Distance = Tavel_Distance - 1 --Schreibe auf das ein Schritt gegangen wurde
+    if Tavel_Distance <= (Start_Max_Travel_Distance / 2 -5) then --Checke ob MAX Travel Distance erreicht wurde
+        Strip_mine_Contoll = false
+        return false
+        --start Journey back(TODO)
+    end
+
+    turtle.dig()
+    turtle.forward()
+end
+
+PrintTitle()
+Setup()
+Navigate_to_height()
+Strip_mine_loop() --Starte Stripmine Prozess
 
 
 
