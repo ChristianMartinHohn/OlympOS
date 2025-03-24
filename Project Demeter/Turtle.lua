@@ -253,8 +253,8 @@ end
 --müssen nur dafür sorgen das wenn die Turtle Base ist entweder die File gelöscht wird oder wir sonst wie fest stellen die soll von vorne anfangen
 
 Fuel_Tab_ID = shell.openTab("Fuel_Screen.lua")
+--öffnet ein neues Tab mit dem Fuel_Screen, dieser bleibt offen auf ewig das schließen muss manuell gemacht werden. Der Fuel screen aktualisiert sich alle 60 Sekunden
 
-local test = read()
 
 if read_mission_file() ~= false then 
     local mission = read_mission_file() 

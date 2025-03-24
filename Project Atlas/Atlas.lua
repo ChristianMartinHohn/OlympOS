@@ -1,7 +1,7 @@
 Zeus_ID = 7
 Start_Time = os.date("%c")
 
-Screen = {
+Title = {
     '                                                   ',
     '---------------------------------------------------',
     '                                                   ',
@@ -30,10 +30,10 @@ Cord_Z = 0
 Cords_Set = false
 
 
-function Show_FuelScreen()
+function PrintTitle()
     term.setBackgroundColor(colors.black)
     term.clear()
-    for y_offset, line in pairs(Screen) do
+    for y_offset, line in pairs(Title) do
         term.setCursorPos(1, y_offset)
         for char in line:gmatch"." do
             if char == '#' then
@@ -100,17 +100,17 @@ function Write_Cord_Save(X, Y, Z)
 end
 
 function Ask_Cords()
-    Show_FuelScreen()
+    PrintTitle()
     term.setCursorPos(15, 17)
     term.write("Please Enter X Cordinate:")
     term.setCursorPos(24, 18)
     Cord_X = read()
-    Show_FuelScreen()
+    PrintTitle()
     term.setCursorPos(15, 17)
     term.write("Please Enter Y Cordinate:")
     term.setCursorPos(24, 18)
     Cord_Y = read()
-    Show_FuelScreen()
+    PrintTitle()
     term.setCursorPos(15, 17)
     term.write("Please Enter Z Cordinate:")
     term.setCursorPos(24, 18)
@@ -130,8 +130,8 @@ function Boot()
         Cords_Set = true
     end
 
-    
-    Show_FuelScreen()
+
+    PrintTitle()
     term.setCursorPos(1, 16)
     peripheral.find("modem", rednet.open)
     Contact_Zeus()
@@ -144,12 +144,10 @@ if p1 == nil then
     local txt = "A Modem is missing"
     local field_lenght = (28 - (string.len(txt)/2))
     Cords_Set = true
-    Show_FuelScreen()
+    PrintTitle()
     term.setCursorPos(field_lenght, 17)
     term.write(txt)
     term.setCursorPos(field_lenght +1, 1)
 else
     Boot()
 end
-
-
