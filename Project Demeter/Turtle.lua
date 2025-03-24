@@ -254,6 +254,7 @@ end
 
 Fuel_Tab_ID = shell.openTab("Fuel_Screen.lua")
 --öffnet ein neues Tab mit dem Fuel_Screen, dieser bleibt offen auf ewig das schließen muss manuell gemacht werden. Der Fuel screen aktualisiert sich alle 60 Sekunden
+--Potentiell wollte ich noch einen Communication screen einbauen wo der Comm status angezeigt wird
 
 
 if read_mission_file() ~= false then 
