@@ -15,6 +15,7 @@ Progress.new = function()
         if file then
             return true
         else
+            logger.log("error", "Mission file does not exist")
             return false
         end
     end
@@ -33,7 +34,7 @@ Progress.new = function()
     end
 
     local function write_mission_file(table) --Hier wird die Mission in eine Datei geschrieben wichtig ist das eine Table als input genommen wird
-        local file = io.open("Turtle_mission.txt", "w")
+        local file = io.open("/Data/Turtle_mission.txt", "w")
         if file then
             file:write(textutils.serialize(table))
             file:close()
@@ -53,6 +54,7 @@ Progress.new = function()
             ["Current_Position"] = gps.locate(),
             ["DemeterID"] = DemeterID
         }
+        --hier evtl Daten an Demeter senden?
         write_mission_file(saveData)
     end
 
@@ -72,18 +74,142 @@ Progress.new = function()
         end
     end
 
-    
+    local function progress_update_MineForResource(Resource)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = Resource,
+                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
+                ["Base_Position"] = old_mission_table["Base_Position"],
+                ["Turtle_State"] = old_mission_table["Turtle_State"],
+                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
+                ["Current_Position"] = old_mission_table["Current_Position"],
+                ["DemeterID"] = old_mission_table["DemeterID"]
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update MineForResource")
+        end
+    end
 
-    local function test()
-        print("sus")
+    local function progress_update_Travel_Distance(Travel_Distance)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = old_mission_table["MineForResource"],
+                ["Travel_Distance"] = Travel_Distance,
+                ["Base_Position"] = old_mission_table["Base_Position"],
+                ["Turtle_State"] = old_mission_table["Turtle_State"],
+                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
+                ["Current_Position"] = old_mission_table["Current_Position"],
+                ["DemeterID"] = old_mission_table["DemeterID"]
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update Travel_Distance")
+        end
+    end
+
+    local function progress_update_Base_Position(Base_Position)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = old_mission_table["MineForResource"],
+                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
+                ["Base_Position"] = Base_Position,
+                ["Turtle_State"] = old_mission_table["Turtle_State"],
+                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
+                ["Current_Position"] = old_mission_table["Current_Position"],
+                ["DemeterID"] = old_mission_table["DemeterID"]
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update Base_Position")
+        end
+    end
+
+    local function progress_update_Turtle_State(Turtle_State)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = old_mission_table["MineForResource"],
+                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
+                ["Base_Position"] = old_mission_table["Base_Position"],
+                ["Turtle_State"] = Turtle_State,
+                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
+                ["Current_Position"] = old_mission_table["Current_Position"],
+                ["DemeterID"] = old_mission_table["DemeterID"]
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update Turtle_State")
+        end
+    end
+
+    local function progress_update_Fuel_Percent(Fuel_Percent)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = old_mission_table["MineForResource"],
+                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
+                ["Base_Position"] = old_mission_table["Base_Position"],
+                ["Turtle_State"] = old_mission_table["Turtle_State"],
+                ["Fuel_Percent"] = Fuel_Percent,
+                ["Current_Position"] = old_mission_table["Current_Position"],
+                ["DemeterID"] = old_mission_table["DemeterID"]
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update Fuel_Percent")
+        end
+    end
+
+    local function progress_update_Current_Position(Current_Position)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = old_mission_table["MineForResource"],
+                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
+                ["Base_Position"] = old_mission_table["Base_Position"],
+                ["Turtle_State"] = old_mission_table["Turtle_State"],
+                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
+                ["Current_Position"] = Current_Position,
+                ["DemeterID"] = old_mission_table["DemeterID"]
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update Current_Position")
+        end
+    end
+
+    local function progress_update_DemeterID(DemeterID)
+        local old_mission_table = read_mission_file()
+        if old_mission_table ~= false then
+            local new_mission_table = {
+                ["MineForResource"] = old_mission_table["MineForResource"],
+                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
+                ["Base_Position"] = old_mission_table["Base_Position"],
+                ["Turtle_State"] = old_mission_table["Turtle_State"],
+                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
+                ["Current_Position"] = old_mission_table["Current_Position"],
+                ["DemeterID"] = DemeterID
+            }
+            write_mission_file(new_mission_table)
+        else
+            logger.log("error", "Could not update DemeterID")
+        end
     end
 
     -- Public Methods
     self.saveProgress = saveProgress
     self.read_mission_file = read_mission_file
-    self.test = test
 
+    self.progress_update_MineForResource = progress_update_MineForResource
+    self.progress_update_Travel_Distance = progress_update_Travel_Distance
+    self.progress_update_Base_Position = progress_update_Base_Position
+    self.progress_update_Turtle_State = progress_update_Turtle_State
+    self.progress_update_Fuel_Percent = progress_update_Fuel_Percent
+    self.progress_update_Current_Position = progress_update_Current_Position
+    self.progress_update_DemeterID = progress_update_DemeterID
     return self
-
-    
 end
