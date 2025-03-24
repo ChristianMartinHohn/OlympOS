@@ -1,7 +1,7 @@
 --Test für eine Fuelanzeige DEMETER > Turtle
 
 
-Title = {
+Screen = {
     '+                   ',
     '---------------------------------------',
     '                                       ',
@@ -17,7 +17,7 @@ Title = {
     ''
 }
 VARIABLE = 0
-Title = {
+Screen = {
     '+                   ',
     '---------------------------------------',
     '                                       ',
@@ -33,9 +33,9 @@ Title = {
     ''
 }
 
-function PrintTitle() --Gibt den Title aus. ACHTUNG manchmal weirder shit mit hintergrund farben also dannach idealer weise backgroundColor auf black wieder setzten.
+function Show_FuelScreen() --Gibt den Title aus. ACHTUNG manchmal weirder shit mit hintergrund farben also dannach idealer weise backgroundColor auf black wieder setzten.
     term.clear()
-    for y_offset, line in pairs(Title) do
+    for y_offset, line in pairs(Screen) do
         term.setCursorPos(1, y_offset)
         for char in line:gmatch"." do
             if char == '#' then

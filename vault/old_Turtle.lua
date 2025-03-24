@@ -46,7 +46,7 @@ Resource_Name_List = {
 Turtle_movement_nodes = {} --Liste an Nodes die die Turtle schon besucht hat, wird benutzt um den weg zurück zu finden
 
 
-Title = {
+Screen = {
     '+                   ',
     '---------------------------------------',
     '                                       ',
@@ -62,9 +62,9 @@ Title = {
     ''
 }
 
-function PrintTitle() --Gibt den Title aus. ACHTUNG manchmal weirder shit mit hintergrund farben also dannach idealer weise backgroundColor auf black wieder setzten.
+function Show_FuelScreen() --Gibt den Title aus. ACHTUNG manchmal weirder shit mit hintergrund farben also dannach idealer weise backgroundColor auf black wieder setzten.
     term.clear()
-    for y_offset, line in pairs(Title) do
+    for y_offset, line in pairs(Screen) do
         term.setCursorPos(1, y_offset)
         for char in line:gmatch"." do
             if char == '#' then
@@ -622,7 +622,7 @@ function mineForward()
     turtle.forward()
 end
 
-PrintTitle()
+Show_FuelScreen()
 Setup()
 Navigate_to_height()
 Strip_mine_loop() --Starte Stripmine Prozess

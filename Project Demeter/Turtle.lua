@@ -1,5 +1,6 @@
 require "Logger"
 require "Move"
+require "Fuel"
 
 peripheral.find("modem", rednet.open)
 
@@ -54,9 +55,13 @@ Base_Position = {0, 0, 0}
 Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 Debug = true
+Fuel_Tab_ID = 0
+UseResourcestoRefuel = false --Entweder remote setzten oder beim boot abfragen ob gefundene Kohle als Fuel genutzt werden soll
+--Bin noch am überlegen ob ich einbauen soll das kohle direkt zu kohle blöcken gecraftet wird aber dafür muss genug platz im inventar sein...
 
 local move = Move.new()
 local logger = Logger.new()
+local fuel = Fuel.new()
 
 function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene Wert eine Resource ist
     for i = 1,#ResourceNameList do
@@ -67,7 +72,7 @@ function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene 
     return false
 end
 
-local function write_mission_file(table) --Hier wird die Mission in eine Datei geschrieben wichtig ist das eine Table als input genommen wird
+function Write_mission_file(table) --Hier wird die Mission in eine Datei geschrieben wichtig ist das eine Table als input genommen wird
     local file = io.open("Turtle_mission.txt", "w")
     if file then
         file:write(textutils.serialize(table))
@@ -75,6 +80,21 @@ local function write_mission_file(table) --Hier wird die Mission in eine Datei g
     else
         error("Could not open file for writing")
     end
+end
+
+
+--Evtl hier in die function eine meldung an Demeter raus hauen, dann kann die SaveProgress funktion gespammed werden und erstens wird alles wichtige gespeichert und direkt auch an die zentrale geschickt.
+function SaveProgress()
+    local saveData = { -- <- Hier bitte noch weiter Daten hinzufügen die nach einem Neustart wieder benötigt werden
+        ["MineForResource"] = MineForResource,
+        ["Travel_Distance"] = Travel_Distance,
+        ["Base_Position"] = Base_Position,
+        ["Turtle_State"] = Turtle_State,
+        ["Fuel_Percent"] = fuel.getFuelPercent(),
+        ["Current_Position"] = gps.locate(),
+        ["DemeterID"] = DemeterID
+    }
+    Write_mission_file(saveData)
 end
 
 local function read_mission_file()
@@ -101,33 +121,6 @@ end
 
 local function setTurtleState(state)
     Turtle_State = state
-end
-
-local function getFuelPercent()
-    local fuelLevel = turtle.getFuelLevel()
-    local fuelLimit = turtle.getFuelLimit()
-    local fuelPercent = (fuelLevel / fuelLimit) * 100
-    return fuelPercent
-end
-
-local function drawProgressBar()
-    local barLength = 28
-    local filledLength = math.floor((getFuelPercent() / 100) * barLength)
-    local bar = "[" .. string.rep("#", filledLength) .. string.rep(" ", barLength - filledLength) .. "]"
-    return bar
-end
-
-local function saveProgress()
-    local saveData = { -- <- Hier bitte noch weiter Daten hinzufügen die nach einem Neustart wieder benötigt werden
-        ["MineForResource"] = MineForResource,
-        ["Travel_Distance"] = Travel_Distance,
-        ["Base_Position"] = Base_Position,
-        ["Turtle_State"] = Turtle_State,
-        ["Fuel_Percent"] = getFuelPercent(),
-        ["Current_Position"] = gps.locate(),
-        ["DemeterID"] = DemeterID
-    }
-    write_mission_file(saveData)
 end
 
 local function stripmine()
@@ -166,10 +159,16 @@ local function stripmine()
 end
 
 local function setup()
+    fuel.first_refuel()
     local fuelLevel = turtle.getFuelLevel()
 
     -- Danke Chris ^^
     if fuelLevel == 0 then
+
+
+
+
+
         write("DENNIS MACH FUEL REIN \n")
         write("> ")
         read()
@@ -249,8 +248,14 @@ local function setup()
     stripmine()
 end
 
+
 --Hier wird gecheckt ob die Turtle gerade neu gestartet wurde oder ob die bereits am Minen war,
 --müssen nur dafür sorgen das wenn die Turtle Base ist entweder die File gelöscht wird oder wir sonst wie fest stellen die soll von vorne anfangen
+
+Fuel_Tab_ID = shell.openTab("Fuel_Screen.lua")
+
+local test = read()
+
 if read_mission_file() ~= false then 
     local mission = read_mission_file() 
     MineForResource = mission["MineForResource"]
@@ -258,9 +263,37 @@ if read_mission_file() ~= false then
     Base_Position = mission["Base_Position"]
     Turtle_State = mission["Turtle_State"]
     if Turtle_State ~= nil then
-        logger.log("info", "Session detected! Resuming mission")
+        logger.log("info", "Old Session detected! Resuming mission")
         if Turtle_State == "MINING" then
             stripmine()
+        elseif Turtle_State == "RETURNING" then
+            --Return to base
+            --Info an Demeter das die Turtle zurück kommt
+            logger.log("info", "Returning to base")
+
+        elseif Turtle_State == "REFUELING" then
+            --Refuel
+            --Info an Demeter das die Turtle sich auflädt
+            logger.log("info", "Refueling")
+
+        elseif Turtle_State == "EMERGENCY" then
+            --Emergency
+            --Info an Demeter das die Turtle in einem Notfall ist
+            --Evtl auch noch eine Nachricht an den Spieler
+            --Am besten wäre es wenn Demeter die nachricht einfach weiterleitet, die Turtle muss nur an Demter senden können
+            logger.log("info", "Emergency")
+
+        elseif Turtle_State == "MOVING" then
+            --Moving
+            --Info an Demeter das die Turtle sich bewegt
+            --Herausfinden wo die Turtle hin wollte
+            logger.log("info", "Moving")
+
+        elseif Turtle_State == "IDLE" then
+            --Idle
+            --Info an Demeter das die Turtle bereit ist für einen Auftrag
+            logger.log("info", "Idle")
+            
         end
     else
         setup()

@@ -1,4 +1,4 @@
-Title = {
+Screen = {
     '                                                   ',
     '                                                   ',
     '---------------------------------------------------',
@@ -24,10 +24,10 @@ Title = {
 os.setComputerLabel("Zeus")
 
 
-function PrintTitle()
+function Show_FuelScreen()
     term.clear()
     term.setBackgroundColor(colors.black)
-    for y_offset, line in pairs(Title) do
+    for y_offset, line in pairs(Screen) do
         term.setCursorPos(1, y_offset)
         for char in line:gmatch"." do
             if char == '#' then
@@ -47,5 +47,5 @@ function PrintTitle()
     term.setBackgroundColor(colors.black)
 end
 
-PrintTitle()
+Show_FuelScreen()
 

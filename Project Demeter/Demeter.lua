@@ -31,7 +31,7 @@ end
 
 peripheral.find("modem", rednet.open)
 
-Title = {
+Screen = {
     '                                                   ',
     '                                                   ',
     '---------------------------------------------------',
@@ -54,9 +54,9 @@ Title = {
     '                                                   ',
 }
 
-function PrintTitle()
+function Show_FuelScreen()
     term.clear()
-    for y_offset, line in pairs(Title) do
+    for y_offset, line in pairs(Screen) do
         term.setCursorPos(1, y_offset)
         for char in line:gmatch"." do
             if char == '#' then
@@ -124,7 +124,7 @@ Turtle_List = {} -- Initialisiere Turtle_List vor dem Laden
 Load_old_Lists()
 
 os.setComputerLabel("Demeter")
-PrintTitle()
+Show_FuelScreen()
 
 while true do --warte auf Nachrichten Loop
     local id, message = rednet.receive()
