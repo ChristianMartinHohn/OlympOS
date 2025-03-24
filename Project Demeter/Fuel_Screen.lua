@@ -1,4 +1,4 @@
-require "Fuel"
+require "functions.Fuel"
 
 local fuel = Fuel.new()
 

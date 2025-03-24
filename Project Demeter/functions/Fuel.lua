@@ -31,9 +31,7 @@ Fuel.new = function ()
         -- Refuelt die Turtle mit den vorhandenen Resourcen, kann genutzt werden um die Turtle Travel_Distance zu erhöhen
         if UseResourcestoRefuel == true then
             Turtle_State = "REFUELING"
-            SaveProgress()
-            logger.log("info", "Refueling")
-    
+            SaveProgress()    
             for i = 1, 16 do
                 turtle.select(i)
                 for _, item in ipairs(fuellist) do
@@ -52,8 +50,6 @@ Fuel.new = function ()
     local function first_refuel()
         Turtle_State = "REFUELING"
             SaveProgress()
-            logger.log("info", "Refueling")
-    
             for i = 1, 16 do
                 turtle.select(i)
                 for _, item in ipairs(fuellist) do
@@ -168,7 +164,7 @@ Fuel.new = function ()
             end
         end
         term.setBackgroundColor(colors.black)
-        local test = read()
+        print("test")
     end
 
     -- Public Methods

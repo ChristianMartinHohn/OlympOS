@@ -1,8 +1,14 @@
-require "Logger"
-require "Move"
-require "Fuel"
+require "functions.Logger"
+require "functions.Move"
+require "functions.Fuel"
+require "functions.Progress"
 
-peripheral.find("modem", rednet.open)
+local move = Move.new()
+local logger = Logger.new()
+local fuel = Fuel.new()
+local progress = Progress.new()
+
+peripheral.find("modem", rednet.open) --nach Communication.lua verschieben
 
 ResourceNameList = {
     "minecraft:coal_ore",
@@ -59,10 +65,6 @@ Fuel_Tab_ID = 0
 UseResourcestoRefuel = false --Entweder remote setzten oder beim boot abfragen ob gefundene Kohle als Fuel genutzt werden soll
 --Bin noch am überlegen ob ich einbauen soll das kohle direkt zu kohle blöcken gecraftet wird aber dafür muss genug platz im inventar sein...
 
-local move = Move.new()
-local logger = Logger.new()
-local fuel = Fuel.new()
-
 function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene Wert eine Resource ist
     for i = 1,#ResourceNameList do
       if (ResourceNameList[i] == value) then
@@ -72,42 +74,13 @@ function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene 
     return false
 end
 
-function Write_mission_file(table) --Hier wird die Mission in eine Datei geschrieben wichtig ist das eine Table als input genommen wird
-    local file = io.open("Turtle_mission.txt", "w")
-    if file then
-        file:write(textutils.serialize(table))
-        file:close()
-    else
-        error("Could not open file for writing")
-    end
-end
 
+--Write_mission_file wird in Progress.lua verschoben
 
---Evtl hier in die function eine meldung an Demeter raus hauen, dann kann die SaveProgress funktion gespammed werden und erstens wird alles wichtige gespeichert und direkt auch an die zentrale geschickt.
-function SaveProgress()
-    local saveData = { -- <- Hier bitte noch weiter Daten hinzufügen die nach einem Neustart wieder benötigt werden
-        ["MineForResource"] = MineForResource,
-        ["Travel_Distance"] = Travel_Distance,
-        ["Base_Position"] = Base_Position,
-        ["Turtle_State"] = Turtle_State,
-        ["Fuel_Percent"] = fuel.getFuelPercent(),
-        ["Current_Position"] = gps.locate(),
-        ["DemeterID"] = DemeterID
-    }
-    Write_mission_file(saveData)
-end
+--SaveProgress wird in Progress.lua verschoben
 
-local function read_mission_file()
-    local file = io.open("Turtle_mission.txt", "r")
-    if file then
-        local content = file:read("*a")
-        file:close()
-        return textutils.unserialize(content)
-    else
-        logger.log("error", "Could not open file for reading")
-        return false
-    end
-end
+--read_mission_file wird in Progress.lua verschoben
+
 
 local function resourceValid(string)
     for _, resource in ipairs(ResourceNameList) do
@@ -119,9 +92,7 @@ local function resourceValid(string)
     return false
 end
 
-local function setTurtleState(state)
-    Turtle_State = state
-end
+--setTurtleState wird in Progress.lua verschoben
 
 local function stripmine()
     setTurtleState("MINING")

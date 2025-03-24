@@ -1,7 +1,7 @@
 require "Logger"
 
-Comms = {}
-Comms.new = function ()
+Communication = {}
+Communication.new = function ()
     local self = {}
     
     local logger = Logger.new()
