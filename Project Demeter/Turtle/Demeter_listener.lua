@@ -1,3 +1,5 @@
+--alt, muss überarbeitet werden
+
 peripheral.find("modem", rednet.open)
 
 local function read_mission_file()

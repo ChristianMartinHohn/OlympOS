@@ -1,41 +1,32 @@
-require "Logger"
-require "Progress"
-
-local progress = Progress.new()
-local logger = Logger.new()
 
 Communication = {}
 Communication.new = function ()
     local self = {}
 
-    peripheral.find("modem", rednet.open)
-
-    local function Setup_Demeter_Connection()
-        
+    local function decrypt_turtle_message(message, turtle_id)
+        local turtle_key = "5548224763"
+        turtle_key = turtle_id .. turtle_key .. os.day()
+        local decrypted_message = ""
+        for i = 1, #message do
+            local byte = string.byte(message, i)
+            decrypted_message = decrypted_message .. string.char(bit.bxor(byte, string.byte(turtle_key, i % #turtle_key + 1)))
+        end
+        return(decrypted_message)
     end
 
-    local function Send_Update()
-        local mission = progress.read_mission_file()
-        if mission ~= false then
-            logger.log("info", "Sending Update to Demeter")
-            local demeter_message = {
-                ["MineForResource"] = mission["MineForResource"],
-                ["Travel_Distance"] = mission["Travel_Distance"],
-                ["Base_Position"] = mission["Base_Position"],
-                ["Turtle_State"] = mission["Turtle_State"],
-                ["Fuel_Percent"] = mission["Fuel_Percent"],
-                ["Current_Position"] = mission["Current_Position"]
-            }
-            rednet.send(mission["DemeterID"], demeter_message)
-        else
-            logger.log("error", "Could not send Update to Demeter")
-            return false
-        end  
+    local function encrypt_turtle_message(message)
+        local turtle_key = "34821008614"
+        turtle_key = os.day() .. demeter_key .. os.getComputerID()
+        local encrypted_message = ""
+        for i = 1, #message do
+            local byte = string.byte(message, i)
+            encrypted_message = encrypted_message .. string.char(bit.bxor(byte, string.byte(turtle_key, i % #turtle_key + 1)))
+        end
+        return(encrypted_message)
     end
 
-
-    -- Public Methods
-    self.Send_Update = Send_Update
+    self.decrypt_turtle_message = decrypt_turtle_message
+    self.encrypt_turtle_message = encrypt_turtle_message
 
     return self
 end

@@ -1,8 +1,8 @@
-require "Communication"
+--require "Communication"
 require "Fuel"
 require "Logger"
 
-local communication = Communication.new()
+--local communication = Communication.new()
 local fuel = Fuel.new()
 local logger = Logger.new()
 
