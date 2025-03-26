@@ -16,7 +16,7 @@ Communication.new = function ()
 
     local function encrypt_turtle_message(message)
         local turtle_key = "34821008614"
-        turtle_key = os.day() .. demeter_key .. os.getComputerID()
+        turtle_key = os.day() .. turtle_key .. os.getComputerID()
         local encrypted_message = ""
         for i = 1, #message do
             local byte = string.byte(message, i)
@@ -25,8 +25,15 @@ Communication.new = function ()
         return(encrypted_message)
     end
 
+    local function awnser_turtle_login(turtle_id)
+        local message = "@ login complete"
+        local encrypted_message = encrypt_turtle_message(message)
+        rednet.send(turtle_id, encrypted_message)
+    end
+
     self.decrypt_turtle_message = decrypt_turtle_message
     self.encrypt_turtle_message = encrypt_turtle_message
+    self.awnser_turtle_login = awnser_turtle_login
 
     return self
 end

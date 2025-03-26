@@ -1,5 +1,5 @@
-require "NodeChecker"
-require "Logger"
+require "functions.NodeChecker"
+require "functions.Logger"
 
 Move = {}
 Move.new = function ()

@@ -1,7 +1,7 @@
-require "Logger"
-require "Progress"
+require "functions.Logger"
+--require "Progress"
 
-local progress = Progress.new()
+--local progress = Progress.new()
 local logger = Logger.new()
 
 Communication = {}
@@ -36,21 +36,29 @@ Communication.new = function ()
         local msg = "@ New Turtle Login" --@ als login, ! als error, ? als request, % als update .. ungefair so in der art
         local encrypted_msg = encrypt_demeter_message(msg)
         rednet.broadcast(encrypted_msg)
+        local id, message = rednet.receive(nil, 10)
+        if message ~= nil then
+            local decrypted_message = decrypt_demeter_message(message)
+            if string.find(decrypted_message, "@") then
+                --progress.progress_update_DemeterID(id)
+                logger.log("info", "Demeter Connection established")
+                return true
+            else
+                logger.log("error", "Demeter Connection could not be established")
+                return false
+            end
+            logger.log("info", "Demeter Connection established")
+            return true
+        else
+            logger.log("error", "Demeter Connection could not be established")
+            return false
+        end
     end
 
-    local function Send_Update()
-        local mission = progress.read_mission_file()
-        if mission ~= false then
+    local function Send_Update(demeter_message)
+        if demeter_message ~= nil then
             logger.log("info", "Sending Update to Demeter")
-            local demeter_message = {
-                ["MineForResource"] = mission["MineForResource"],
-                ["Travel_Distance"] = mission["Travel_Distance"],
-                ["Base_Position"] = mission["Base_Position"],
-                ["Turtle_State"] = mission["Turtle_State"],
-                ["Fuel_Percent"] = mission["Fuel_Percent"],
-                ["Current_Position"] = mission["Current_Position"]
-            }
-            rednet.send(mission["DemeterID"], demeter_message)
+            rednet.send(demeter_message["DemeterID"], demeter_message)
         else
             logger.log("error", "Could not send Update to Demeter")
             return false

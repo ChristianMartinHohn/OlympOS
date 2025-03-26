@@ -1,12 +1,14 @@
-require "functions.Logger"
 require "functions.Move"
 require "functions.Fuel"
 require "functions.Progress"
+require "functions.Communication"
+require "functions.Logger"
 
 local move = Move.new()
 local logger = Logger.new()
 local fuel = Fuel.new()
 local progress = Progress.new()
+local communication = Communication.new()
 
 peripheral.find("modem", rednet.open) --nach Communication.lua verschieben
 
@@ -56,7 +58,7 @@ HeightForResource = {
 }
 
 Turtle_State = "IDLE" --IDLE, MOVING, MINING, RETURNING, REFUELING, EMERGENCY
-Travel_Distance = 0
+Travel_Distance = 17
 Base_Position = {0, 0, 0}
 Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
@@ -133,26 +135,16 @@ local function setup()
     fuel.first_refuel()
     local fuelLevel = turtle.getFuelLevel()
 
-    -- Danke Chris ^^
-    if fuelLevel == 0 then
-
-
-
-
-
-        write("DENNIS MACH FUEL REIN \n")
-        write("> ")
-        read()
-    end
-    -- Calculate the maximum travel distance
-    Travel_Distance = turtle.getFuelLimit() / 2
-    
+    Travel_Distance = turtle.getFuelLevel() / 2
+    exit()
     -- Define the resource to mine
     term.clear()
 
-    write("Please enter the ID of the Demter Serer: \n")
-    write("> ")
-    DemeterID = read()
+    --write("Please enter the ID of the Demter Serer: \n")
+    --write("> ")
+    DemeterID = communication.Setup_Demeter_Connection()
+
+
 
     while true do
         write("What resource should the turtle mine? \n")
@@ -227,15 +219,15 @@ Fuel_Tab_ID = shell.openTab("Fuel_Screen.lua")
 --öffnet ein neues Tab mit dem Fuel_Screen, dieser bleibt offen auf ewig das schließen muss manuell gemacht werden. Der Fuel screen aktualisiert sich alle 60 Sekunden
 --Potentiell wollte ich noch einen Communication screen einbauen wo der Comm status angezeigt wird
 
-
-if read_mission_file() ~= false then 
-    local mission = read_mission_file() 
-    MineForResource = mission["MineForResource"]
-    Travel_Distance = mission["Travel_Distance"]
-    Base_Position = mission["Base_Position"]
-    Turtle_State = mission["Turtle_State"]
+local previous_mission = progress.read_mission_file()
+previous_mission = false -- Dev statement um setup zu testen
+if previous_mission ~= false then
+    logger.log("info", "Old Session detected! Resuming mission")
+    MineForResource = previous_mission["MineForResource"]
+    Travel_Distance = previous_mission["Travel_Distance"]
+    Base_Position = previous_mission["Base_Position"]
+    Turtle_State = previous_mission["Turtle_State"]
     if Turtle_State ~= nil then
-        logger.log("info", "Old Session detected! Resuming mission")
         if Turtle_State == "MINING" then
             stripmine()
         elseif Turtle_State == "RETURNING" then

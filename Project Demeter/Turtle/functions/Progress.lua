@@ -1,8 +1,8 @@
---require "Communication"
-require "Fuel"
-require "Logger"
+require "functions.Communication"
+require "functions.Fuel"
+require "functions.Logger"
 
---local communication = Communication.new()
+local communication = Communication.new()
 local fuel = Fuel.new()
 local logger = Logger.new()
 
@@ -39,7 +39,7 @@ Progress.new = function()
             file:write(textutils.serialize(table))
             file:close()
         else
-            error("Could not open file for writing")
+            logger.error("Could not open file for writing")
         end
     end
 
@@ -56,6 +56,7 @@ Progress.new = function()
         }
         --hier evtl Daten an Demeter senden?
         write_mission_file(saveData)
+        communication.Send_Update(saveData)
     end
 
     local function read_mission_file()
@@ -71,6 +72,7 @@ Progress.new = function()
             end
         else
             setup_mission_file()
+            return false
         end
     end
 

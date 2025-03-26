@@ -1,12 +1,11 @@
-require "Logger"
-require "Communication"
+require "functions.Logger"
 
 NodeChecker = {}
 NodeChecker.new = function()
     local self = {}
 
     local logger = Logger.new()
-    local demeter = Comms.new()
+    --local demeter = Comms.new()
 
     -- Holds the coordinates of newly discovered resource nodes.
     local resourceNodeCoordinates = {}
@@ -362,7 +361,7 @@ NodeChecker.new = function()
             if not x or not y or not z then
                 Turtle_State = "EMERGENCY"
                 logger.log("error", "GPS location still not found. Aborting the program.")
-                demeter.Send_Update("GPS location not found. Aborting the program.")
+                --demeter.Send_Update("GPS location not found. Aborting the program.")
                 error("GPS location not found. Aborting the program.")
             end
         end

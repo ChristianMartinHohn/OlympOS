@@ -31,7 +31,6 @@ Fuel.new = function ()
         -- Refuelt die Turtle mit den vorhandenen Resourcen, kann genutzt werden um die Turtle Travel_Distance zu erhöhen
         if UseResourcestoRefuel == true then
             Turtle_State = "REFUELING"
-            SaveProgress()    
             for i = 1, 16 do
                 turtle.select(i)
                 for _, item in ipairs(fuellist) do
@@ -45,20 +44,6 @@ Fuel.new = function ()
     
         local current_travel_distance = Travel_Distance
     
-    end
-    
-    local function first_refuel()
-        Turtle_State = "REFUELING"
-            SaveProgress()
-            for i = 1, 16 do
-                turtle.select(i)
-                for _, item in ipairs(fuellist) do
-                    if turtle.getItemDetail() and turtle.getItemDetail().name == item then
-                        turtle.refuel()
-                    end
-                end
-            end
-            turtle.select(1)
     end
 
     local function getFuelPercent()
@@ -164,8 +149,29 @@ Fuel.new = function ()
             end
         end
         term.setBackgroundColor(colors.black)
-        print("test")
     end
+
+    local function first_refuel()
+        show_FuelScreen()
+        while true do
+            for i = 1, 16 do
+                turtle.select(i)
+                for _, item in ipairs(Fuellist) do
+                    if turtle.getItemDetail() and turtle.getItemDetail().name == item then
+                        turtle.refuel()
+                    end
+                end
+            end
+            turtle.select(1)
+            Travel_Distance = turtle.getFuelLevel() / 2
+            show_FuelScreen()
+            sleep(5)
+            if getFuelPercent() > 30 then
+                break
+            end
+        end
+        
+end
 
     -- Public Methods
     self.refuel_on_mission = refuel_on_mission

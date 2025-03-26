@@ -1,22 +1,14 @@
 require "functions.Info_Screen"
-require "functions.Communication"
 
 local info_screen = Info_Screen.new()
-local communication = Communication.new()
-
 
 os.setComputerLabel("Demeter")
 
-
 while true do --warte auf Nachrichten Loop
+    --info_screen.Start_Screen()
     local id, message = rednet.receive()
+    print("Recieved message from: " .. id)
     if (message) then
-        local decrypted_message = communication.decrypt_turtle_message(message, id)
-        if string.find(decrypted_message, "@") then
-            print("The message contains the '@' character.")
-        else
-            print("The message does not contain the '@' character.")
-        end
-        print(decrypted_message)
+        shell.run("message_handler", id, message)
     end
 end 
