@@ -10,7 +10,7 @@ local fuel = Fuel.new()
 local progress = Progress.new()
 local communication = Communication.new()
 
-peripheral.find("modem", rednet.open) --nach Communication.lua verschieben
+
 
 ResourceNameList = {
     "minecraft:coal_ore",
@@ -64,8 +64,11 @@ Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 Debug = true
 Fuel_Tab_ID = 0
+Modem_attached = false
 UseResourcestoRefuel = false --Entweder remote setzten oder beim boot abfragen ob gefundene Kohle als Fuel genutzt werden soll
 --Bin noch am überlegen ob ich einbauen soll das kohle direkt zu kohle blöcken gecraftet wird aber dafür muss genug platz im inventar sein...
+
+
 
 function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene Wert eine Resource ist
     for i = 1,#ResourceNameList do
@@ -75,14 +78,6 @@ function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene 
     end
     return false
 end
-
-
---Write_mission_file wird in Progress.lua verschoben
-
---SaveProgress wird in Progress.lua verschoben
-
---read_mission_file wird in Progress.lua verschoben
-
 
 local function resourceValid(string)
     for _, resource in ipairs(ResourceNameList) do
@@ -94,7 +89,7 @@ local function resourceValid(string)
     return false
 end
 
---setTurtleState wird in Progress.lua verschoben
+
 
 local function stripmine()
     setTurtleState("MINING")
@@ -132,6 +127,11 @@ local function stripmine()
 end
 
 local function setup()
+    Modem_attached = communication.setup_locate_modem()
+    print(Modem_attached)
+    exit()
+
+    Base_Position = gps.locate()
     fuel.first_refuel()
     local fuelLevel = turtle.getFuelLevel()
 
