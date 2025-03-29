@@ -1,2 +1,8 @@
 Da ich zu faul bin ein Kanban Board oder ähnliches aufzusetzten mache ich das jz hier
 
+  Turtle
+  - [] Return to Base function ->Turtle.lua/103 & Move.lua
+  - [] Check if Inventory full ->Turtle.lua/108
+
+  Hermes
+  - [] Alles
