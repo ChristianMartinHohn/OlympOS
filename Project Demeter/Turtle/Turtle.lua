@@ -69,7 +69,7 @@ UseResourcestoRefuel = false --Entweder remote setzten oder beim boot abfragen o
 --Bin noch am überlegen ob ich einbauen soll das kohle direkt zu kohle blöcken gecraftet wird aber dafür muss genug platz im inventar sein...
 
 
-
+-- Wird das ganze hier noch gebraucht???
 function IsResource(value) --Hier wird gecheckt ob der als Variable übergebene Wert eine Resource ist
     for i = 1,#ResourceNameList do
       if (ResourceNameList[i] == value) then
@@ -92,7 +92,7 @@ end
 
 
 local function stripmine()
-    setTurtleState("MINING")
+    progress.update_Turtle_State("MINING")
     logger.log("info", "Starting strip mining")
     os.setComputerLabel("Stripmining for " .. MineForResource)
 
@@ -100,10 +100,11 @@ local function stripmine()
         -- Check if the turtle has enough fuel
         if Travel_Distance < 25 then
             logger.log("warning", "Low fuel. Returning to base")
-            returnToBase()
+            returnToBase() -- muss noch geschrieben werden
         end
 
         -- Check if the turtle has enough space
+        -- Würd ich nochmal überarbeiten
         if turtle.getItemCount(16) > 0 then
             logger.log("warning", "Inventory is full. Returning to base")
             returnToBase()
@@ -135,17 +136,15 @@ local function setup()
     fuel.first_refuel()
     local fuelLevel = turtle.getFuelLevel()
 
-    Travel_Distance = turtle.getFuelLevel() / 2
-    exit()
+
+    Travel_Distance = fuelLevel / 2
     -- Define the resource to mine
     term.clear()
 
-    --write("Please enter the ID of the Demter Serer: \n")
-    --write("> ")
     DemeterID = communication.Setup_Demeter_Connection()
 
-
-
+    
+    --hier evtl 
     while true do
         write("What resource should the turtle mine? \n")
         write("> ")
@@ -162,6 +161,8 @@ local function setup()
             logger.log("warning", "Invalid resource. Please try again.")
         end
     end
+
+    progress.saveProgress(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID)
 
     -- Check the Orientation
     local x, y, z = gps.locate()

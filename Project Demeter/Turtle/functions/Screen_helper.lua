@@ -48,7 +48,7 @@ Screen_helper.new = function ()
         term.write("]")
     end
 
-    local function draw_demeter_seach_screen(iteration, max, objective)
+    local function draw_demeter_seach_screen(iteration, max)
         local color_list = {colors.white, colors.orange, colors.white, colors.white}
         term.clear()
         for y_offset, line in pairs(Modem_Search_Screen) do
@@ -63,7 +63,7 @@ Screen_helper.new = function ()
                 elseif char == '+' then
                     term.write("Turtle: ")
                     term.write(os.getComputerID())
-                    term.write(" - " .. objective .. "")
+                    term.write(" - Contacting Demeter")
                 elseif char == '&' then
                     term.write("Progress:")
                 elseif char == '%' then

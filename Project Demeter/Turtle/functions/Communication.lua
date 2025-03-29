@@ -114,6 +114,7 @@ Communication.new = function ()
     self.Setup_Demeter_Connection = Setup_Demeter_Connection
     self.setup_locate_modem = setup_locate_modem
 
+    
     return self
 end
 
