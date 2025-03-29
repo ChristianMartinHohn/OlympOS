@@ -5,4 +5,5 @@ Da ich zu faul bin ein Kanban Board oder ähnliches aufzusetzten mache ich das j
   - [] Check if Inventory full ->Turtle.lua/108
 
   Hermes
-  - [] Alles
+  - [x] Alles
+  - <input type="checkbox" disabled checked />
