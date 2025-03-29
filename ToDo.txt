@@ -6,3 +6,4 @@ Da ich zu faul bin ein Kanban Board oder ähnliches aufzusetzten mache ich das j
 
   Hermes
   - [] Alles
+  - [] Evtl ein Message network einbauen? wäre schon kinda cool

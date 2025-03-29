@@ -1,3 +1,5 @@
+os.setComputerLabel("Hermes")
+
 Title = {
     '                          ',
     '                          ',
@@ -14,7 +16,7 @@ Title = {
     ' #          ##          # ',
     ' #                      # ',
     ' #                      # ',
-    ' #   +  # ',
+    ' #                      # ',
     ' ######################## ',
     '                          ',
     '                          ',
@@ -36,7 +38,7 @@ Title2 = {
     ' #          ##          # ',
     ' #                      # ',
     ' #                      # ',
-    ' #   +  # ',
+    ' #                      # ',
     ' ######################## ',
     '                          ',
     '                          ',
@@ -45,9 +47,7 @@ Title2 = {
 
 
 
-os.setComputerLabel("Hermes")
-
-function Opening_Animation()
+local function Opening_Animation()
     for i = 1, 3, 1 do
         term.clear()
         for y_offset, line in pairs(Title) do
@@ -92,7 +92,8 @@ function Opening_Animation()
     end
 end
 
-function Ask_UserName()
-    term.setCursorPos(1, 18)
-    print("sus")
-end
+Opening_Animation()
+
+
+--evtl hier eine locale Datenbank einbauen
+--genau so wie mehrere Pages die dann die Info anzeigen
