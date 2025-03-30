@@ -1,0 +1,14 @@
+<diagram program="umletino" version="15.1"><zoom_level>15</zoom_level><element><id>UMLHierarchy</id><coordinates><x>120</x><y>225</y><w>495</w><h>645</h></coordinates><panel_attributes>type=Package
+Database
+	%ID
+		Turtle_%ID.txt
+			MineForResource
+			Travel_Distance
+			Base_Position
+			Turtle_State
+			Fuel_Percent
+			GPS location
+			DemeterID
+	?Global
+		?Resource_Nodes.txt
+		</panel_attributes><additional_attributes></additional_attributes></element></diagram>

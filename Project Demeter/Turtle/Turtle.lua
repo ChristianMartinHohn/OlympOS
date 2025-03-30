@@ -89,8 +89,6 @@ local function resourceValid(string)
     return false
 end
 
-
-
 local function stripmine()
     progress.update_Turtle_State("MINING")
     logger.log("info", "Starting strip mining")
