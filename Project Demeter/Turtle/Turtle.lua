@@ -58,7 +58,7 @@ HeightForResource = {
 }
 
 Turtle_State = "IDLE" --IDLE, MOVING, MINING, RETURNING, REFUELING, EMERGENCY
-Travel_Distance = 17
+Travel_Distance = 0
 Base_Position = {0, 0, 0}
 Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
@@ -66,6 +66,7 @@ Debug = true
 Fuel_Tab_ID = 0
 Modem_attached = false
 UseResourcestoRefuel = false --Entweder remote setzten oder beim boot abfragen ob gefundene Kohle als Fuel genutzt werden soll
+Session_Distance_Tracker = 0
 --Bin noch am überlegen ob ich einbauen soll das kohle direkt zu kohle blöcken gecraftet wird aber dafür muss genug platz im inventar sein...
 
 
@@ -126,6 +127,7 @@ local function stripmine()
 end
 
 local function setup()
+    Progress.set_First_activation()
     Modem_attached = communication.setup_locate_modem()
     print(Modem_attached)
     exit()

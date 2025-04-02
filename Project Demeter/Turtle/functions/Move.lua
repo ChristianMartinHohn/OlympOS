@@ -18,6 +18,7 @@ Move.new = function ()
         end
 
         Travel_Distance = Travel_Distance - 1
+        Session_Distance_Tracker = Session_Distance_Tracker + 1
     end
 
     local function up()
@@ -30,6 +31,7 @@ Move.new = function ()
         end
         
         Travel_Distance = Travel_Distance - 1
+        Session_Distance_Tracker = Session_Distance_Tracker + 1
     end
     
     local function forward()
@@ -107,6 +109,7 @@ Move.new = function ()
         end
         
         Travel_Distance = Travel_Distance - 1
+        Session_Distance_Tracker = Session_Distance_Tracker + 1
         nodeChecker.check()
     end
 
