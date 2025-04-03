@@ -127,6 +127,7 @@ local function stripmine()
 end
 
 local function setup()
+    -- Wichtig das dass setup nur einmal aufgerufen wird, sonst wird die Turtle immer wieder zurückgesetzt
     Progress.set_First_activation()
     Modem_attached = communication.setup_locate_modem()
     print(Modem_attached)

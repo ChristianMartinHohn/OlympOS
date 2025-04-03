@@ -61,6 +61,8 @@ Progress.new = function()
         communication.Send_Update(saveData)
     end
 
+    --Wenn hier changes gemacht werden, wäre es cool wenn die Database_struct.uxf welche sich im Demeter verzeichnis befindet uptodate gehalten wird.
+
     local function read_mission_file()
         if check_mission_file_exists() then
             local file = io.open("/Data/Turtle_mission.txt", "r")

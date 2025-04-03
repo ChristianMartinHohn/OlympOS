@@ -1,14 +1,31 @@
-<diagram program="umletino" version="15.1"><zoom_level>15</zoom_level><element><id>UMLHierarchy</id><coordinates><x>120</x><y>225</y><w>495</w><h>645</h></coordinates><panel_attributes>type=Package
+<diagram program="umletino" version="15.1"><zoom_level>15</zoom_level><element><id>UMLHierarchy</id><coordinates><x>675</x><y>75</y><w>615</w><h>1035</h></coordinates><panel_attributes>type=Package
 Database
 	%ID
 		Turtle_%ID.txt
-			MineForResource
-			Travel_Distance
-			Base_Position
-			Turtle_State
-			Fuel_Percent
-			GPS location
-			DemeterID
-	?Global
-		?Resource_Nodes.txt
-		</panel_attributes><additional_attributes></additional_attributes></element></diagram>
+			&lt;&gt;MineForResource[string]
+			&lt;&gt;Travel_Distance[int]
+			&lt;&gt;Base_Position[int]
+			&lt;&gt;Turtle_State[string]
+			&lt;&gt;Fuel_Percent[int]
+			&lt;&gt;GPS location[int]
+			&lt;&gt;Total_Distance_Traveled[int]
+			&lt;&gt;First_Activation[time]
+			&lt;&gt;DemeterID[int]
+	Global (Not yet Implemented)
+		Resource_Node_GPS.txt
+			&lt;&gt;GPS[int]
+			&lt;&gt;Resource[string]
+			&lt;&gt;Mined[bool]
+		Turtle_GPS.txt
+			%ID
+				&lt;&gt;GPS[int]</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>195</x><y>150</y><w>435</w><h>375</h></coordinates><panel_attributes>%ID steht für die Computer ID welche mit os.getComputerID() ermittelt wird.
+
+&lt;&gt; steht für ein set an Daten welches ausgelesen werden kann wenn die ausgegebene Tabelle danach befragt wird.
+bg=blue
+
+Auch wichtig zu beachten ist das die Global Tabelle hauptsächlich für Prometheus und Hermes da sein Soll
+
+
+style=wordwrap
+
+</panel_attributes><additional_attributes></additional_attributes></element></diagram>
