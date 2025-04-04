@@ -35,7 +35,7 @@ Communication.new = function ()
         return(decrypted_message)
     end
 
-    local function Setup_Demeter_Connection()
+    local function setup_Demeter_Connection()
         screen_helper.draw_demeter_seach_screen(0, 1)
         local msg = "@ New Turtle Login" --@ als login, ! als error, ? als request, % als update .. ungefair so in der art
         local encrypted_msg = encrypt_demeter_message(msg)
@@ -116,7 +116,7 @@ Communication.new = function ()
 
     -- Public Methods
     self.Send_Update = Send_Update
-    self.Setup_Demeter_Connection = Setup_Demeter_Connection
+    self.setup_Demeter_Connection = setup_Demeter_Connection
     self.setup_locate_modem = setup_locate_modem
     return self
 end

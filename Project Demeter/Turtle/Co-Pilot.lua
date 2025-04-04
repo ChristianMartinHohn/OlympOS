@@ -12,7 +12,7 @@ if Modem_attached == false then
     return false
 else
     Offline_Mode = false
-    DemeterID = communication.Setup_Demeter_Connection()
+    DemeterID = communication.setup_Demeter_Connection()
 end
 
 if Offline_Mode == true or DemeterID == nil then
@@ -38,7 +38,6 @@ else
         end
     
         communication.send_update(message)
-    
     end
 end
 
