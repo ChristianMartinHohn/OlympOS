@@ -1,1 +1,0 @@
-print(turtle.getItemCount(16))

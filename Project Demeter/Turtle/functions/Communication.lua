@@ -36,6 +36,7 @@ Communication.new = function ()
     end
 
     local function Setup_Demeter_Connection()
+        screen_helper.draw_demeter_seach_screen(0, 1)
         local msg = "@ New Turtle Login" --@ als login, ! als error, ? als request, % als update .. ungefair so in der art
         local encrypted_msg = encrypt_demeter_message(msg)
         rednet.broadcast(encrypted_msg)
@@ -50,8 +51,6 @@ Communication.new = function ()
                 logger.log("error", "Demeter Connection could not be established")
                 return false
             end
-            logger.log("info", "Demeter Connection established")
-            return true
         else
             logger.log("error", "Demeter Connection could not be established")
             return false
@@ -59,13 +58,19 @@ Communication.new = function ()
     end
 
     local function Send_Update(demeter_message)
-        if demeter_message ~= nil then
-            logger.log("info", "Sending Update to Demeter")
-            rednet.send(demeter_message["DemeterID"], demeter_message)
-        else
-            logger.log("error", "Could not send Update to Demeter")
+        if Offline_Mode == true then
+            logger.log("info", "Offline Mode. No Update sent to Demeter")
             return false
-        end  
+        else
+            if demeter_message ~= nil then
+                logger.log("info", "Sending Update to Demeter")
+                rednet.send(demeter_message["DemeterID"], demeter_message)
+            else
+                logger.log("error", "No Message to send")
+                return false
+            end  
+        end
+
     end
 
     local function check_modem_in_inventory()
@@ -113,8 +118,6 @@ Communication.new = function ()
     self.Send_Update = Send_Update
     self.Setup_Demeter_Connection = Setup_Demeter_Connection
     self.setup_locate_modem = setup_locate_modem
-
-    
     return self
 end
 

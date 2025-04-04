@@ -44,7 +44,7 @@ Progress.new = function()
     end
 
     --Evtl hier in die function eine meldung an Demeter raus hauen, dann kann die SaveProgress funktion gespammed werden und erstens wird alles wichtige gespeichert und direkt auch an die zentrale geschickt.
-    local function saveProgress(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID, Total_Distance_Traveled, First_activation)
+    local function saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID, Total_Distance_Traveled, First_activation)
         local saveData = { -- <- Hier bitte noch weiter Daten hinzufügen die nach einem Neustart wieder benötigt werden
             ["MineForResource"] = MineForResource,
             ["Travel_Distance"] = Travel_Distance,
@@ -58,7 +58,6 @@ Progress.new = function()
         }
         --hier evtl Daten an Demeter senden?
         write_mission_file(saveData)
-        communication.Send_Update(saveData)
     end
 
     --Wenn hier changes gemacht werden, wäre es cool wenn die Database_struct.uxf welche sich im Demeter verzeichnis befindet uptodate gehalten wird.
@@ -228,23 +227,18 @@ Progress.new = function()
 
     local function set_First_activation()
         local date_time = os.date("%F %T")
-        local old_mission_table = read_mission_file()
-        if old_mission_table ~= false then
-            local new_mission_table = {
-                ["MineForResource"] = old_mission_table["MineForResource"],
-                ["Travel_Distance"] = old_mission_table["Travel_Distance"],
-                ["Base_Position"] = old_mission_table["Base_Position"],
-                ["Turtle_State"] = old_mission_table["Turtle_State"],
-                ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
-                ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
-                ["First_activation"] = date_time,
-                ["DemeterID"] = DemeterID
-            }
-            write_mission_file(new_mission_table)
-        else
-            logger.log("error", "Could not update DemeterID")
-        end
+        local new_mission_table = {
+            ["MineForResource"] = " ",
+            ["Travel_Distance"] = " ",
+            ["Base_Position"] = " ",
+            ["Turtle_State"] = " ",
+            ["Fuel_Percent"] = " ",
+            ["Current_Position"] = gps.locate(),
+            ["Total_Distance_Traveled"] = " ",
+            ["First_activation"] = date_time,
+            ["DemeterID"] = DemeterID
+        }
+        write_mission_file(new_mission_table)
     end
 
     local function update_DemeterID(DemeterID)
@@ -268,7 +262,7 @@ Progress.new = function()
     end
 
     -- Public Methods
-    self.saveProgress = saveProgress
+    self.saveProgress_local = saveProgress_local
     self.read_mission_file = read_mission_file
 
     self.update_MineForResource = update_MineForResource

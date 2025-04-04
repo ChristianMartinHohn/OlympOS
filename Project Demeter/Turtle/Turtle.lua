@@ -1,14 +1,12 @@
 require "functions.Move"
 require "functions.Fuel"
 require "functions.Progress"
-require "functions.Communication"
 require "functions.Logger"
 
 local move = Move.new()
 local logger = Logger.new()
 local fuel = Fuel.new()
 local progress = Progress.new()
-local communication = Communication.new()
 
 
 
@@ -64,7 +62,6 @@ Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 Debug = true
 Fuel_Tab_ID = 0
-Modem_attached = false
 UseResourcestoRefuel = false --Entweder remote setzten oder beim boot abfragen ob gefundene Kohle als Fuel genutzt werden soll
 Session_Distance_Tracker = 0
 --Bin noch am überlegen ob ich einbauen soll das kohle direkt zu kohle blöcken gecraftet wird aber dafür muss genug platz im inventar sein...
@@ -128,10 +125,7 @@ end
 
 local function setup()
     -- Wichtig das dass setup nur einmal aufgerufen wird, sonst wird die Turtle immer wieder zurückgesetzt
-    Progress.set_First_activation()
-    Modem_attached = communication.setup_locate_modem()
-    print(Modem_attached)
-    exit()
+    progress.set_First_activation()
 
     Base_Position = gps.locate()
     fuel.first_refuel()
@@ -141,15 +135,13 @@ local function setup()
     Travel_Distance = fuelLevel / 2
     -- Define the resource to mine
     term.clear()
-
-    DemeterID = communication.Setup_Demeter_Connection()
-
     
     --hier evtl 
     while true do
         write("What resource should the turtle mine? \n")
         write("> ")
         local mineForResource_input = read()
+        --Muss MineForResource eine globale Variable sein oder kann ich die hier lokal definieren?
         MineForResource = resourceValid(mineForResource_input)
 
         -- Check if the resource is in the list
@@ -163,7 +155,8 @@ local function setup()
         end
     end
 
-    progress.saveProgress(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID)
+    -- muss überarbeitet werden
+    progress.saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID)
 
     -- Check the Orientation
     local x, y, z = gps.locate()
@@ -184,13 +177,8 @@ local function setup()
 
     logger.log("info", "Orientation is " .. Orientation)
 
-    -- Save the base position
-    local x, y, z = gps.locate()
-    Base_Position = {x, y, z}
-    logger.log("info", "Base position saved at " .. x .. ", " .. y .. ", " .. z)
-
     -- After the resource is defined, the turtle should move to the correct height
-    setTurtleState("MOVING")
+    progress.update_Turtle_State("MOVING")
     local goalHeight = HeightForResource[MineForResource]
     logger.log("info", "Moving to height " .. goalHeight)
 
@@ -217,12 +205,15 @@ end
 --Hier wird gecheckt ob die Turtle gerade neu gestartet wurde oder ob die bereits am Minen war,
 --müssen nur dafür sorgen das wenn die Turtle Base ist entweder die File gelöscht wird oder wir sonst wie fest stellen die soll von vorne anfangen
 
-Fuel_Tab_ID = shell.openTab("Fuel_Screen.lua")
+Fuel_Tab_ID = shell.openTab("Info_Screen.lua")
+
 --öffnet ein neues Tab mit dem Fuel_Screen, dieser bleibt offen auf ewig das schließen muss manuell gemacht werden. Der Fuel screen aktualisiert sich alle 60 Sekunden
 --Potentiell wollte ich noch einen Communication screen einbauen wo der Comm status angezeigt wird
 
+Co_Pilot_ID = shell.openTab("Co-Pilot.lua")
+
+--hier das previous_mission setzten muss noch überarbeitet werden
 local previous_mission = progress.read_mission_file()
-previous_mission = false -- Dev statement um setup zu testen
 if previous_mission ~= false then
     logger.log("info", "Old Session detected! Resuming mission")
     MineForResource = previous_mission["MineForResource"]
