@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.1"><zoom_level>15</zoom_level><element><id>UMLHierarchy</id><coordinates><x>675</x><y>75</y><w>615</w><h>1035</h></coordinates><panel_attributes>type=Package
+<diagram program="umletino" version="15.1"><zoom_level>15</zoom_level><element><id>UMLHierarchy</id><coordinates><x>480</x><y>130</y><w>615</w><h>1035</h></coordinates><panel_attributes>type=Package
 Database
 	%ID
 		Turtle_%ID.txt
@@ -18,7 +18,7 @@ Database
 			&lt;&gt;Mined[bool]
 		Turtle_GPS.txt
 			%ID
-				&lt;&gt;GPS[int]</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>195</x><y>150</y><w>435</w><h>375</h></coordinates><panel_attributes>%ID steht für die Computer ID welche mit os.getComputerID() ermittelt wird.
+				&lt;&gt;GPS[int]</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>0</x><y>205</y><w>435</w><h>375</h></coordinates><panel_attributes>%ID steht für die Computer ID welche mit os.getComputerID() ermittelt wird.
 
 &lt;&gt; steht für ein set an Daten welches ausgelesen werden kann wenn die ausgegebene Tabelle danach befragt wird.
 bg=blue

@@ -8,7 +8,7 @@ local logger = Logger.new()
 local fuel = Fuel.new()
 local progress = Progress.new()
 
-
+Development = true
 
 ResourceNameList = {
     "minecraft:coal_ore",
@@ -199,6 +199,21 @@ local function setup()
 
     -- Start strip mining
     stripmine()
+end
+
+if Development then
+    print("sus")
+    Base_Position = gps.locate()
+    for i = 1, 5 do
+        move.forward()
+    end
+    move.left()
+    for i = 1, 5 do
+        move.back()
+    end
+    move.right()
+
+    exit()
 end
 
 

@@ -114,7 +114,9 @@ NodeChecker.new = function()
         -- Reset only these globals; do not clear resourceNodeCoordinates here.
         StartPos = nil
         StartOrtion = nil
-        os.setComputerLabel("Stripmining for " .. MineForResource)
+        
+        --warum wird hier nochmal das Label gesetzt?
+        --os.setComputerLabel("Stripmining for " .. MineForResource)
     end
 
     ----------------------------------------------------------------------------

@@ -1,14 +1,19 @@
 require "functions.NodeChecker"
 require "functions.Logger"
+require "functions.WayPoints"
 
 Move = {}
 Move.new = function ()
     local self = {}
-    
+
     local logger = Logger.new()
     local nodeChecker = NodeChecker.new()
 
+    local waypoints = WayPoints.new()
+    
+
     local function down()
+        waypoints.add_waypoint("down")
         turtle.digDown()
         
         a1, a2 = turtle.down()
@@ -22,6 +27,7 @@ Move.new = function ()
     end
 
     local function up()
+        waypoints.add_waypoint("up")
         turtle.digUp()
         
         a1, a2 = turtle.up()
@@ -35,11 +41,13 @@ Move.new = function ()
     end
     
     local function forward()
+        waypoints.add_waypoint("forward")
         turtle.dig()
         self.move()
     end
 
     local function back()
+        waypoints.add_waypoint("back")
         turtle.turnLeft()
         Orientation = (Orientation - 1) % 4
         nodeChecker.check()
@@ -61,6 +69,7 @@ Move.new = function ()
     end
 
     local function left()
+        waypoints.add_waypoint("left")
         turtle.turnLeft()
         Orientation = (Orientation - 1) % 4
         nodeChecker.check()
@@ -74,6 +83,7 @@ Move.new = function ()
     end
 
     local function right()
+        waypoints.add_waypoint("right")
         turtle.turnRight()
         Orientation = (Orientation + 1) % 4
         nodeChecker.check()
