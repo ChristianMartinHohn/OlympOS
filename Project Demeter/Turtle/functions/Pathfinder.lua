@@ -1,5 +1,5 @@
-WayPoints = {}
-WayPoints.new = function()
+Pathfinder = {}
+Pathfinder.new = function()
     local self = {}
 
     local waypoint_list = {}
@@ -33,45 +33,34 @@ WayPoints.new = function()
             file:close()
         end
     end
-
+    
     --irgendwo muss noch bei einem neustart die waypoint_list geladen werden und die waypoint file gelesen
 
     local function add_waypoint(direction)
+        --problem ist das der Waypoint beim ersten schritt erstellt wird und dann hier gecheckt wird nach dem block auf dem gestartet wurde
+        --Evtl ein Dev problem das gelöst wird durch Base_Position mit speichern, hier muss wahrscheinlich ein anderer Test geschrieben werden
         setup_waypoint_file()
-        local cur_gps_location = {gps.locate()}
+        local x, y, z = gps.locate()
         if waypoint_list[#waypoint_list] == nil then
             local waypoint = {
                 Direction = direction,
-                GPS = cur_gps_location
+                GPS = {["x"]= x, ["y"] = y, ["z"] = z}
             }
             table.insert(waypoint_list, waypoint)
         else
-            for i = 1, #waypoint_list do
-                if waypoint_list[i].GPS == cur_gps_location then
-                    for j = #waypoint_list, i, 1 do
-                        table.remove(waypoint_list, j)
-                        print("remove Waypoint " .. i .. " ")
-                        --funktioniert noch nicht, glaube das es daran liegt das die GPS location geholt wird bevor der schritt gemacht wird
-                    end
-                    return
+            for i = 1, #waypoint_list, 1 do
+                if waypoint_list[i].GPS.x == x and waypoint_list[i].GPS.y == y and waypoint_list[i].GPS.z == z then
+                    print("Waypoint already exists")
                 end
             end
-
             if waypoint_list[#waypoint_list].Direction ~= direction then
                 local waypoint = {
                     Direction = direction,
-                    GPS = cur_gps_location
+                    GPS = {["x"]= x, ["y"] = y, ["z"] = z}
                 }
                 table.insert(waypoint_list, waypoint)
             end
-
-            for i = 1, #waypoint_list do
-                local waypoint = waypoint_list[i]
-                print("Waypoint " .. i .. ": " .. waypoint.Direction .. " - GPS: " .. waypoint.GPS[1] .. ", " .. waypoint.GPS[2] .. ", " .. waypoint.GPS[3])
-            end
         end
-
-        
         write_waypoint_file()
     end
 

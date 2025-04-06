@@ -120,6 +120,8 @@ local function stripmine()
         for i = 1, 5 do
             move.left()
         end
+
+        --hier evtl checken ob neu Befehle gegeben wurden
     end
 end
 
@@ -128,6 +130,7 @@ local function setup()
     progress.set_First_activation()
 
     Base_Position = gps.locate()
+    --hier ist evtl ein fehler drin weil gps.locate nicht so funktioniert
     fuel.first_refuel()
     local fuelLevel = turtle.getFuelLevel()
 
@@ -202,13 +205,13 @@ local function setup()
 end
 
 if Development then
-    print("sus")
-    Base_Position = gps.locate()
-    for i = 1, 5 do
+    local x, y, z = gps.locate()
+    Base_Position = {["x"]= x, ["y"] = y, ["z"] = z}
+    for i = 1, 2, 1 do
         move.forward()
     end
     move.left()
-    for i = 1, 5 do
+    for i = 1, 2, 1 do
         move.back()
     end
     move.right()

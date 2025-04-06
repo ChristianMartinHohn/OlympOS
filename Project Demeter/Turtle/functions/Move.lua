@@ -1,6 +1,6 @@
 require "functions.NodeChecker"
 require "functions.Logger"
-require "functions.WayPoints"
+require "functions.Pathfinder"
 
 Move = {}
 Move.new = function ()
@@ -9,11 +9,10 @@ Move.new = function ()
     local logger = Logger.new()
     local nodeChecker = NodeChecker.new()
 
-    local waypoints = WayPoints.new()
+    local pathfinder = Pathfinder.new()
     
 
     local function down()
-        waypoints.add_waypoint("down")
         turtle.digDown()
         
         a1, a2 = turtle.down()
@@ -24,10 +23,10 @@ Move.new = function ()
 
         Travel_Distance = Travel_Distance - 1
         Session_Distance_Tracker = Session_Distance_Tracker + 1
+        pathfinder.add_waypoint("down")
     end
 
     local function up()
-        waypoints.add_waypoint("up")
         turtle.digUp()
         
         a1, a2 = turtle.up()
@@ -38,16 +37,16 @@ Move.new = function ()
         
         Travel_Distance = Travel_Distance - 1
         Session_Distance_Tracker = Session_Distance_Tracker + 1
+        pathfinder.add_waypoint("up")
     end
     
     local function forward()
-        waypoints.add_waypoint("forward")
         turtle.dig()
         self.move()
+        pathfinder.add_waypoint("forward")
     end
 
     local function back()
-        waypoints.add_waypoint("back")
         turtle.turnLeft()
         Orientation = (Orientation - 1) % 4
         nodeChecker.check()
@@ -66,10 +65,10 @@ Move.new = function ()
         turtle.turnLeft()
         Orientation = (Orientation - 1) % 4
         nodeChecker.check()
+        pathfinder.add_waypoint("back")
     end
 
     local function left()
-        waypoints.add_waypoint("left")
         turtle.turnLeft()
         Orientation = (Orientation - 1) % 4
         nodeChecker.check()
@@ -80,10 +79,10 @@ Move.new = function ()
         turtle.turnRight()
         Orientation = (Orientation + 1) % 4
         nodeChecker.check()
+        pathfinder.add_waypoint("left")
     end
 
     local function right()
-        waypoints.add_waypoint("right")
         turtle.turnRight()
         Orientation = (Orientation + 1) % 4
         nodeChecker.check()
@@ -94,6 +93,7 @@ Move.new = function ()
         turtle.turnLeft()
         Orientation = (Orientation - 1) % 4
         nodeChecker.check()
+        pathfinder.add_waypoint("right")
     end
 
     function move()
