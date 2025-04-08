@@ -57,7 +57,7 @@ HeightForResource = {
 
 Turtle_State = "IDLE" --IDLE, MOVING, MINING, RETURNING, REFUELING, EMERGENCY
 Travel_Distance = 0
-Base_Position = {0, 0, 0}
+Base_Position = {["x"]= 0, ["y"] = 0, ["z"] = 0}
 Waypoints = {}
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 Debug = true
@@ -129,7 +129,8 @@ local function setup()
     -- Wichtig das dass setup nur einmal aufgerufen wird, sonst wird die Turtle immer wieder zurückgesetzt
     progress.set_First_activation()
 
-    Base_Position = gps.locate()
+    local x, y, z = gps.locate()
+    Base_Position = {["x"]= x, ["y"] = y, ["z"] = z}
     --hier ist evtl ein fehler drin weil gps.locate nicht so funktioniert
     fuel.first_refuel()
     local fuelLevel = turtle.getFuelLevel()
