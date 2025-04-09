@@ -37,7 +37,6 @@ Pathfinder.new = function()
 
     local function check_waypoint_system()
         if waypoint_list[1] == nil then
-            print("Waypoint list is empty")
         --wenn die waypoint_list leer ist, dann wurd die Turtle gerade erst gestartet
             if check_waypoint_file_exists() then
             --wenn eine waypoint file existiert, dann muss die turtle vor dem Programm start sich schon mal bewegt haben
@@ -51,13 +50,17 @@ Pathfinder.new = function()
 
     local function delete_all_following_waypoints(count)
         if count == 1 then
+            --funktioniert noch nicht
             fs.delete("/Data/WayPoints.txt")
+            waypoint_list = {}
             return
         else
-            for i = count, #waypoint_list, 1 do
-                table.remove(waypoint_list, i)
-                print("Deleted waypoint " .. i)
+            for i = #waypoint_list, count, -1 do
+                table.remove(waypoint_list)
+                print("delete waypoint".. waypoint_list[i])
             end
+            write_waypoint_file()
+            return
         end
         --delete all waypoints after the first one       
     end
@@ -68,7 +71,6 @@ Pathfinder.new = function()
         check_waypoint_system()
 
         local x, y, z = gps.locate()
-        print(#waypoint_list)
         if waypoint_list[2] == nil then
         --waypoint_list[2] wird gecheckt, da waypoint_list[1] immer die Base_Position ist
         --wenn waypoint_list[2] nil ist, dann hat die Turtle noch keinen Schritt gemacht
@@ -77,26 +79,31 @@ Pathfinder.new = function()
                 GPS = {["x"]= x, ["y"] = y, ["z"] = z}
             }
             table.insert(waypoint_list, waypoint)
+            write_waypoint_file()
         else
             for i = 1, #waypoint_list, 1 do
                 if waypoint_list[i].GPS.x == x and waypoint_list[i].GPS.y == y and waypoint_list[i].GPS.z == z then
                     delete_all_following_waypoints(i)
+                    break
                 end
             end
-            if waypoint_list[#waypoint_list].Direction ~= direction then
-                local waypoint = {
-                    Direction = direction,
-                    GPS = {["x"]= x, ["y"] = y, ["z"] = z}
-                }
-                table.insert(waypoint_list, waypoint)
-            end
+            if waypoint_list[1] ~= nil then
+                if waypoint_list[#waypoint_list].Direction ~= direction then
+                    local waypoint = {
+                        Direction = direction,
+                        GPS = {["x"]= x, ["y"] = y, ["z"] = z}
+                    }
+                    table.insert(waypoint_list, waypoint)
+                    write_waypoint_file()
+                end
+            end 
         end
-        write_waypoint_file() --muss wo anderes hin --dev
     end
 
     local function get_waypoint_list()
         return waypoint_list
     end
+
 
     self.add_waypoint = add_waypoint
     self.get_waypoint_list = get_waypoint_list

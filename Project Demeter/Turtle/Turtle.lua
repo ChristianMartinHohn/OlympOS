@@ -58,7 +58,7 @@ HeightForResource = {
 Turtle_State = "IDLE" --IDLE, MOVING, MINING, RETURNING, REFUELING, EMERGENCY
 Travel_Distance = 0
 Base_Position = {["x"]= 0, ["y"] = 0, ["z"] = 0}
-Waypoints = {}
+--Orientation muss entweder jedes mal herausgefunden werden oder mit gespeichert werden
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 Debug = true
 Fuel_Tab_ID = 0
@@ -125,6 +125,26 @@ local function stripmine()
     end
 end
 
+local function set_Orientation()
+        -- Check the Orientation
+        local x, y, z = gps.locate()
+        move.forward(false)
+        local x2, y2, z2 = gps.locate()
+        
+        -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
+        if x2 > x then
+            Orientation = 1
+        elseif x2 < x then
+            Orientation = 3
+        elseif z2 > z then
+            Orientation = 2
+        elseif z2 < z then
+            Orientation = 0
+        end
+    
+        move.back(false)
+end
+
 local function setup()
     -- Wichtig das dass setup nur einmal aufgerufen wird, sonst wird die Turtle immer wieder zurückgesetzt
     progress.set_First_activation()
@@ -139,6 +159,8 @@ local function setup()
     Travel_Distance = fuelLevel / 2
     -- Define the resource to mine
     term.clear()
+    
+
     
     --hier evtl 
     while true do
@@ -162,22 +184,7 @@ local function setup()
     -- muss überarbeitet werden
     progress.saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID)
 
-    -- Check the Orientation
-    local x, y, z = gps.locate()
-    move.forward()
-    local x2, y2, z2 = gps.locate()
-
-    if x2 > x then
-        Orientation = 1
-    elseif x2 < x then
-        Orientation = 3
-    elseif z2 > z then
-        Orientation = 2
-    elseif z2 < z then
-        Orientation = 0
-    end
-
-    move.back()
+    set_Orientation()
 
     logger.log("info", "Orientation is " .. Orientation)
 
@@ -206,16 +213,18 @@ local function setup()
 end
 
 if Development then
+    set_Orientation()
     local x, y, z = gps.locate()
     Base_Position = {["x"]= x, ["y"] = y, ["z"] = z}
-    for i = 1, 2, 1 do
+    for i = 1, 3, 1 do
         move.forward()
     end
     move.left()
     for i = 1, 2, 1 do
         move.back()
     end
-    move.right()
+    print("returning to Base")
+    move.return_Base()
 
     exit()
 end
