@@ -56,11 +56,10 @@ Pathfinder.new = function()
             return
         else
             for i = #waypoint_list, count, -1 do
-                table.remove(waypoint_list)
-                print("delete waypoint".. waypoint_list[i])
+                table.remove(waypoint_list, i)
+                print("deleting waypoint " .. i)
             end
             write_waypoint_file()
-            return
         end
         --delete all waypoints after the first one       
     end
@@ -104,9 +103,33 @@ Pathfinder.new = function()
         return waypoint_list
     end
 
+    local function find_best_path(goal_x, goal_y, goal_z)
+        --gibt die mindest anzahl an Waypoints zurück die benötigt werden um das ziel zu erreichen
+        --wichtig ist hier das zuerst die höhe erreicht wird
+        local target_waypoint_list = {}
+        local x, y, z = gps.locate()
+
+        local waypoint = {
+            GPS = {["x"]= x, ["y"] = goal_y, ["z"] = z}
+        }
+        table.insert(target_waypoint_list, waypoint)
+        
+        waypoint = {
+            GPS = {["x"]= goal_x, ["y"] = goal_y, ["z"] = z}
+        }
+        table.insert(target_waypoint_list, waypoint)
+
+        waypoint = {
+            GPS = {["x"]= goal_x, ["y"] = goal_y, ["z"] = goal_z}
+        }
+        table.insert(target_waypoint_list, waypoint)
+
+        return target_waypoint_list
+    end
 
     self.add_waypoint = add_waypoint
     self.get_waypoint_list = get_waypoint_list
+    self.find_best_path = find_best_path
 
     
     return self

@@ -142,10 +142,8 @@ Move.new = function ()
             local waypoint = waypoint_list[i]
             while true do
                 local x, y, z = gps.locate()
-                print(string.format("going to Waypoint - X: %d, Y: %d, Z: %d", waypoint.GPS.x, waypoint.GPS.y, waypoint.GPS.z))
-                print("currently at - X: " .. x .. ", Y: " .. y .. ", Z: " .. z)
                 if waypoint.GPS.x == x and waypoint.GPS.y == y and waypoint.GPS.z == z then
-                    print("Arrived at waypoint")
+                    table.remove(waypoint_list, i)
                     break
                 else
                     if waypoint.GPS.x < x then
@@ -177,10 +175,10 @@ Move.new = function ()
                             x = x - 1
                         end
                     elseif waypoint.GPS.y < y then
-                        up(false)
+                        down(false)
                         y = y + 1
                     elseif waypoint.GPS.y > y then
-                        down(false)
+                        up(false)
                         y = y - 1
                     elseif waypoint.GPS.z < z then
                         if Orientation == 0 then
@@ -212,7 +210,84 @@ Move.new = function ()
                         end
                     end
                 end
-                sleep(1)
+            end
+        end
+    end
+
+    local function navigate_to_Target(x, y, z)
+        local target_waypoint_list = pathfinder.find_best_path(x, y, z)
+
+        for i = 1, #target_waypoint_list, 1 do
+            local waypoint = target_waypoint_list[i]
+            while true do
+                local x, y, z = gps.locate()
+                if waypoint.GPS.x == x and waypoint.GPS.y == y and waypoint.GPS.z == z then
+                    break
+                else
+                    if waypoint.GPS.x < x then
+                        if Orientation == 0 then
+                            left()
+                            x = x + 1
+                        elseif Orientation == 1 then
+                            back()
+                            x = x + 1
+                        elseif Orientation == 2 then
+                            right()
+                            x = x + 1
+                        elseif Orientation == 3 then
+                            forward()
+                            x = x + 1
+                        end
+                    elseif waypoint.GPS.x > x then
+                        if Orientation == 0 then
+                            right()
+                            x = x - 1
+                        elseif Orientation == 1 then
+                            forward()
+                            x = x - 1
+                        elseif Orientation == 2 then
+                            left()
+                            x = x - 1
+                        elseif Orientation == 3 then
+                            back()
+                            x = x - 1
+                        end
+                    elseif waypoint.GPS.y < y then
+                        down()
+                        y = y + 1
+                    elseif waypoint.GPS.y > y then
+                        up()
+                        y = y - 1
+                    elseif waypoint.GPS.z < z then
+                        if Orientation == 0 then
+                            forward()
+                            z = z + 1
+                        elseif Orientation == 1 then
+                            left()
+                            z = z + 1
+                        elseif Orientation == 2 then
+                            back()
+                            z = z + 1
+                        elseif Orientation == 3 then
+                            right()
+                            z = z + 1
+                        end
+                    elseif waypoint.GPS.z > z then
+                        if Orientation == 0 then
+                            back()
+                            z = z - 1
+                        elseif Orientation == 1 then
+                            right()
+                            z = z - 1
+                        elseif Orientation == 2 then
+                            forward()
+                            z = z - 1
+                        elseif Orientation == 3 then
+                            left()
+                            z = z - 1
+                        end
+                    end
+                end
             end
         end
     end
@@ -253,6 +328,7 @@ Move.new = function ()
     self.right = right
 
     self.return_Base = return_Base
+    self.navigate_to_Target = navigate_to_Target
 
     -- Private Methods
     self.move = move

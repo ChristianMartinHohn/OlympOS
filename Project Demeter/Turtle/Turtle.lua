@@ -216,14 +216,9 @@ if Development then
     set_Orientation()
     local x, y, z = gps.locate()
     Base_Position = {["x"]= x, ["y"] = y, ["z"] = z}
-    for i = 1, 3, 1 do
-        move.forward()
-    end
-    move.left()
-    for i = 1, 2, 1 do
-        move.back()
-    end
-    print("returning to Base")
+
+    move.navigate_to_Target(875, 83, 1835)
+    sleep(5)
     move.return_Base()
 
     exit()
