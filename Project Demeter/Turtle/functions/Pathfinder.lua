@@ -95,6 +95,7 @@ Pathfinder.new = function()
                     table.insert(waypoint_list, waypoint)
                     write_waypoint_file()
                 end
+            --Fehlt hier ein Else? Um die Base position zu handeln
             end 
         end
     end
