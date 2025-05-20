@@ -2,11 +2,13 @@ require "functions.Move"
 require "functions.Fuel"
 require "functions.Progress"
 require "functions.Logger"
+require "functions.InventoryManager"
 
 local move = Move.new()
 local logger = Logger.new()
 local fuel = Fuel.new()
 local progress = Progress.new()
+local inventorymanager = InventoryManager.new()
 
 Development = true
 
@@ -55,9 +57,15 @@ HeightForResource = {
     ["create:deepslate_zinc_ore"] = 48,
 }
 
+--der shit hier oben muss nochmal richtig sortiert werden
+
 Turtle_State = "IDLE" --IDLE, MOVING, MINING, RETURNING, REFUELING, EMERGENCY
 Travel_Distance = 0
 Base_Position = {["x"]= 0, ["y"] = 0, ["z"] = 0}
+
+Pickaxe_Equipped = false
+Modem_Equipped = false
+
 --Orientation muss entweder jedes mal herausgefunden werden oder mit gespeichert werden
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 Debug = true
@@ -145,6 +153,66 @@ local function set_Orientation()
         move.back(false)
 end
 
+local function check_left_Attachement()
+    turtle.equipLeft()
+    local item = turtle.getItemDetail()
+    if not item then
+        return false
+    else
+        local itemName = item.name
+        if itemName == "minecraft:diamond_pickaxe" then
+            Pickaxe_Equipped = true
+        elseif itemName == "computercraft:wireless_modem_advanced" then
+            Modem_Equipped = true
+        end
+    end
+    turtle.equipLeft()
+end
+
+local function check_right_Attachement()
+    turtle.equipRight()
+    local item = turtle.getItemDetail()
+    if not item then
+        return false
+    else
+        local itemName = item.name
+        if itemName == "minecraft:diamond_pickaxe" then
+            Pickaxe_Equipped = true
+        elseif itemName == "computercraft:wireless_modem_advanced" then
+            Modem_Equipped = true
+        end
+    end
+    turtle.equipRight()
+end
+
+local function check_turtle_functional()
+    local emptySlots = inventorymanager.getEmptySlots()
+    local dropped_item = false
+    if not emptySlots then
+        turtle.select(1)
+        turtle.drop()
+        dropped_item = true
+    else
+        turtle.select(emptySlots[1])
+    end
+
+    
+    check_left_Attachement()
+    check_right_Attachement()
+
+    if dropped_item == true then
+        move.forward()
+        turtle.suck()
+    end
+    turtle.select(1)
+
+    if not Pickaxe_Equipped then
+        return false
+    end
+    
+    return true
+end
+
 local function setup()
     -- Wichtig das dass setup nur einmal aufgerufen wird, sonst wird die Turtle immer wieder zurückgesetzt
     progress.set_First_activation()
@@ -212,6 +280,13 @@ local function setup()
     stripmine()
 end
 
+if check_turtle_functional() == false then
+    --Hier wird gecheckt ob die Turtle noch funktioniert, wenn nicht wird sie in den Emergency state versetzt
+    --und die Turtle wird zurück zur Base geschickt
+    logger.log("error", "Turtle is not functional.")
+    exit()
+end
+exit()
 if Development then
     set_Orientation()
     local x, y, z = gps.locate()
@@ -225,6 +300,7 @@ if Development then
 end
 
 
+
 --Hier wird gecheckt ob die Turtle gerade neu gestartet wurde oder ob die bereits am Minen war,
 --müssen nur dafür sorgen das wenn die Turtle Base ist entweder die File gelöscht wird oder wir sonst wie fest stellen die soll von vorne anfangen
 
@@ -234,6 +310,8 @@ Fuel_Tab_ID = shell.openTab("Info_Screen.lua")
 --Potentiell wollte ich noch einen Communication screen einbauen wo der Comm status angezeigt wird
 
 Co_Pilot_ID = shell.openTab("Co-Pilot.lua")
+
+
 
 --hier das previous_mission setzten muss noch überarbeitet werden
 local previous_mission = progress.read_mission_file()
