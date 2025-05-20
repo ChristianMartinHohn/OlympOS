@@ -50,10 +50,9 @@ Pathfinder.new = function()
 
     local function delete_all_following_waypoints(count)
         if count == 1 then
-            --funktioniert noch nicht
+            --funktioniert noch nicht ????? warum?????
             fs.delete("/Data/WayPoints.txt")
             waypoint_list = {}
-            return
         else
             for i = #waypoint_list, count, -1 do
                 table.remove(waypoint_list, i)
@@ -80,23 +79,26 @@ Pathfinder.new = function()
             table.insert(waypoint_list, waypoint)
             write_waypoint_file()
         else
+            if waypoint_list[1].GPS.x == x and waypoint_list[1].GPS.y == y and waypoint_list[1].GPS.z == z then
+                --wenn die Turtle auf der Base Position ist, dann wird die Base Position gelöscht
+                --und die Turtle kann sich wieder bewegen
+                delete_all_following_waypoints(1)
+            end
             for i = 1, #waypoint_list, 1 do
                 if waypoint_list[i].GPS.x == x and waypoint_list[i].GPS.y == y and waypoint_list[i].GPS.z == z then
                     delete_all_following_waypoints(i)
                     break
                 end
             end
-            if waypoint_list[1] ~= nil then
-                if waypoint_list[#waypoint_list].Direction ~= direction then
-                    local waypoint = {
-                        Direction = direction,
-                        GPS = {["x"]= x, ["y"] = y, ["z"] = z}
-                    }
-                    table.insert(waypoint_list, waypoint)
-                    write_waypoint_file()
-                end
+            if waypoint_list[#waypoint_list].Direction ~= direction then
+                local waypoint = {
+                    Direction = direction,
+                    GPS = {["x"]= x, ["y"] = y, ["z"] = z}
+                }
+                table.insert(waypoint_list, waypoint)
+                write_waypoint_file()
+            end
             --Fehlt hier ein Else? Um die Base position zu handeln
-            end 
         end
     end
 
