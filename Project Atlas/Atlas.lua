@@ -1,141 +1,85 @@
-Zeus_ID = 7
-Start_Time = os.date("%c")
+require "functions.Atlas_DB"
 
-Title = {
-    '                                                   ',
-    '---------------------------------------------------',
-    '                                                   ',
-    '         #  #######  #          #      ######      ',
-    '        ###    #     #         ###    ##           ',
-    '       #   #   #     #        #   #   ##           ',
-    '      #     #  #     #       #     #   #####       ',
-    '      #######  #     #       #######       ##      ',
-    '      #     #  #     #       #     #       ##      ',
-    '      #     #  #     ######  #     #  ######       ',
-    '                                                   ',
-    '---------------------------------------------------',
-    '              +           ',
-    '---------------------------------------------------',
-    '                                                   ',
-    '                                                   ',
-    '                                                   '
-}
+local database = Atlas_DB.new()
 
-os.setComputerLabel("Atlas")
+os.setComputerLabel("ATLAS")
 
-Cord_X = 0
-Cord_Y = 0
-Cord_Z = 0
-
-Cords_Set = false
+peripheral.find("modem", rednet.open)
 
 
-function PrintTitle()
-    term.setBackgroundColor(colors.black)
-    term.clear()
-    for y_offset, line in pairs(Title) do
-        term.setCursorPos(1, y_offset)
-        for char in line:gmatch"." do
-            if char == '#' then
-                term.setBackgroundColor(colors.white)
-            elseif char == '-' then
-                term.setBackgroundColor(colors.brown)
-            elseif char == '+' then
-                term.write("The World on my Shoulders")
-            elseif char == '/' and Cords_Set == false then
-                term.setBackgroundColor(colors.gray)
-            else
-                term.setBackgroundColor(colors.black)
+local function lookup_Atlas_num()
+    local atlas_list = {rednet.lookup("ATLAS")}
+    if not atlas_list then
+        rednet.host("ATLAS", "ATLAS" .. 1)
+    else
+        if #atlas_list > 4 then
+            print("Too many ATLAS instances running, exiting...")
+            exit()
+        else
+            for i = 1, #atlas_list do
+                if atlas_list[i] == os.getComputerID() then
+                    rednet.unhost("ATLAS")
+                    ATLAS_NUM = i
+                    rednet.host("ATLAS", "ATLAS" .. i)
+                    database.write_db_file()
+                    return true
+                end
             end
-            term.write(' ')
+            rednet.host("ATLAS", "ATLAS" .. (#atlas_list + 1))
+            ATLAS_NUM = #atlas_list + 1
+            database.write_db_file()
+            return true
         end
     end
-    term.setBackgroundColor(colors.black)
-    if Cords_Set == true then
-        local cord_len = string.len(Cord_X)
-        cord_len = cord_len + string.len(Cord_Y)
-        cord_len = cord_len + string.len(Cord_Z)
-        cord_len = cord_len + 10
-        local field_lenght = (28 - (cord_len/2))
-        term.setCursorPos(field_lenght, 1)
-        term.write("<X:"..Cord_X.." Y:"..Cord_Y.." Z:"..Cord_Z..">")
-        term.setCursorPos(25, 18)
-    end
 end
 
-function Contact_Zeus()
-    peripheral.find("modem", rednet.open)
-    local zeus_message = {Projekt = "Atlas", StartTime = Start_Time, TransmitionTime = os.clock(), Position = {Cord_X, Cord_Y, Cord_Z}}
-    rednet.send(Zeus_ID, zeus_message)
-end
 
-local function file_exists(file)
-    local f = io.open(file, "rb")
-    if f then f:close() end
-    return f ~= nil
-  end
-
-function Read_Cord_Save()
-    if not file_exists("Cord_Save.txt") then 
-        local f = io.open("Cord_Save.txt", "w")
-        if f ~= nil then
-            f:write("0\n0\n0")
-            f:close()
-        end
-    end
-
-    local lines = {}
-    for line in io.lines("Cord_Save.txt") do
-        lines[#lines + 1] = line
-    end
-    return lines
-end
-
-function Write_Cord_Save(X, Y, Z)
-    local f = io.open("Cord_Save.txt", "w")
-        if f ~= nil then
-            f:write(""..X.."\n"..Y.."\n"..Z.."")
-            f:close()
-        end
-end
 
 function Ask_Cords()
-    PrintTitle()
+    --PrintTitle()
+    term.clear()
     term.setCursorPos(15, 17)
     term.write("Please Enter X Cordinate:")
     term.setCursorPos(24, 18)
-    Cord_X = read()
-    PrintTitle()
+    Cordinates.x = read()
+    --PrintTitle()
+    term.clear()
     term.setCursorPos(15, 17)
     term.write("Please Enter Y Cordinate:")
     term.setCursorPos(24, 18)
-    Cord_Y = read()
-    PrintTitle()
+    Cordinates.y = read()
+    --PrintTitle()
+    term.clear()
     term.setCursorPos(15, 17)
     term.write("Please Enter Z Cordinate:")
     term.setCursorPos(24, 18)
-    Cord_Z = read()
-    Cords_Set = true
-    Write_Cord_Save(Cord_X, Cord_Y, Cord_Z)
+    Cordinates.z = read()
+    database.write_db_file()
 end
 
 function Boot()
-    local past_Cords = Read_Cord_Save()
-    if past_Cords[1] == "0" and past_Cords[2] == "0" and past_Cords[3] == "0" then
-        Ask_Cords()
-    else
-        Cord_X = past_Cords[1]
-        Cord_Y = past_Cords[2]
-        Cord_Z = past_Cords[3]
-        Cords_Set = true
+    Cordinates = {x = 0, y = 0, z = 0}
+    ATLAS_NUM = 0
+
+    local awnser = database.read_db_file()
+    if awnser then
+        Cordinates = awnser.Cordinates
+        ATLAS_NUM = awnser.ATLAS_NUM
     end
 
+    if Cordinates.x == 0 and Cordinates.y == 0 and Cordinates.z == 0 then
+        Ask_Cords()
+    end
 
-    PrintTitle()
-    term.setCursorPos(1, 16)
-    peripheral.find("modem", rednet.open)
-    Contact_Zeus()
-    shell.run("gps", "host", Cord_X, Cord_Y, Cord_Z)
+    if ATLAS_NUM == 0 then
+        lookup_Atlas_num()
+    end
+
+    local shell_id = shell.openTab("Info_Screen")
+
+    shell.switchTab(shell_id)
+
+    shell.run("gps", "host", Cordinates.x, Cordinates.y, Cordinates.z)
 end
 
 p1, p2 = peripheral.find("modem")
