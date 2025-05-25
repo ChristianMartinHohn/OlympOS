@@ -8,7 +8,7 @@ local logger = Logger.new()
 local screen_helper = Screen_helper.new()
 
 Communication = {}
-Communication.new = function ()
+Communication.new = function()
     local self = {}
 
     peripheral.find("modem", rednet.open)
@@ -35,6 +35,21 @@ Communication.new = function ()
         return(decrypted_message)
     end
 
+    local function get_gps_position()
+        if GPS_Enabled and not Offline_Mode then
+            local x, y, z = gps.locate()
+            if x and y and z then
+                return {x = x, y = y, z = z}
+            else
+                logger.log("error", "GPS location could not be determined")
+                return nil
+            end
+        else
+            logger.log("error", "GPS is not enabled")
+            return nil
+        end
+    end
+
     local function setup_Demeter_Connection()
         screen_helper.draw_demeter_seach_screen(0, 1)
         local msg = "@ New Turtle Login" --@ als login, ! als error, ? als request, % als update .. ungefair so in der art
@@ -44,6 +59,7 @@ Communication.new = function ()
         if message ~= nil then
             local decrypted_message = decrypt_demeter_message(message)
             if string.find(decrypted_message, "@") then
+                DemeterID = id
                 --progress.progress_update_DemeterID(id)
                 logger.log("info", "Demeter Connection established")
                 return true
@@ -57,67 +73,49 @@ Communication.new = function ()
         end
     end
 
-    local function Send_Update(demeter_message)
-        if Offline_Mode == true then
-            logger.log("info", "Offline Mode. No Update sent to Demeter")
-            return false
-        else
+    local function Send_Update(message_type, demeter_message)
+        if not Offline_Mode then
             if demeter_message ~= nil then
+                demeter_message["MessageType"] = message_type
                 logger.log("info", "Sending Update to Demeter")
-                rednet.send(demeter_message["DemeterID"], demeter_message)
+                rednet.send(DemeterID, demeter_message)
             else
                 logger.log("error", "No Message to send")
                 return false
             end  
+        else
+            logger.log("info", "Offline Mode. No Update sent to Demeter")
+            return false
         end
+
 
     end
 
-    local function check_modem_in_inventory()
-        for i = 1, 16 do
-            sleep(0.1)
-            screen_helper.draw_modem_seach_screen(nil, i, 16)
-            turtle.select(i)
-            if turtle.getItemDetail() and turtle.getItemDetail().name == "computercraft:wireless_modem_advanced" then
-                turtle.equipLeft()
-                if turtle.getItemDetail() and turtle.getItemDetail().name == "minecraft:diamond_pickaxe" then
-                    turtle.equipRight()
-                end
-                turtle.select(1)
-                screen_helper.draw_modem_seach_screen(true, 16, 16)
-                sleep(2)
-                return true
-            end
-        end
-        turtle.select(1)
-        screen_helper.draw_modem_seach_screen(false, 16, 16)
-        sleep(2)
-        --hier evtl fragen ob ohne Modem weiter gemacht wird
-        return false
-    end
-    
-    local function setup_locate_modem()
-        screen_helper.draw_modem_seach_screen(nil, 1, 16)
-        local modem = peripheral.find("modem")
-        if modem == nil then
-            if check_modem_in_inventory() then
+    local function Send_Emergency(reason, fuel_percent)
+        if not Offline_Mode then
+            if reason ~= nil then
+                logger.log("info", "Sending Emergency Message to Demeter")
+                local message = {
+                    ["Emergency_type"] = reason,
+                    ["Fuel_Percent"] = fuel_percent,
+                    ["Current_Position"] = get_gps_position(),
+                    ["MessageType"] = "Emergency"
+                }
+                rednet.send(DemeterID, message)
                 return true
             else
-                logger.log("error", "No modem found")
+                logger.log("error", "No Message to send")
                 return false
             end
         else
-            screen_helper.draw_modem_seach_screen(true, 16, 16)
-            peripheral.find("modem", rednet.open)
-            sleep(2)
-            return true
+            logger.log("info", "Offline Mode. No Emergency Message sent to Demeter")
+            return false
         end
     end
 
     -- Public Methods
     self.Send_Update = Send_Update
     self.setup_Demeter_Connection = setup_Demeter_Connection
-    self.setup_locate_modem = setup_locate_modem
+    self.Send_Emergency = Send_Emergency
     return self
 end
-

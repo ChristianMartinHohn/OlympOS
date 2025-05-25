@@ -10,6 +10,21 @@ Progress = {}
 Progress.new = function()
     local self = {}
 
+    local function get_gps_position()
+        if GPS_Enabled and not Offline_Mode then
+            local x, y, z = gps.locate()
+            if x and y and z then
+                return {x = x, y = y, z = z}
+            else
+                logger.log("error", "GPS location could not be determined")
+                return nil
+            end
+        else
+            logger.log("error", "GPS is not enabled")
+            return nil
+        end
+    end
+
     local function check_mission_file_exists()
         local file = io.open("/Data/Turtle_mission.txt", "r")
         if file then
@@ -43,15 +58,16 @@ Progress.new = function()
         end
     end
 
+    -- nicht sicher ob noch relevant oder funktioniert
     --Evtl hier in die function eine meldung an Demeter raus hauen, dann kann die SaveProgress funktion gespammed werden und erstens wird alles wichtige gespeichert und direkt auch an die zentrale geschickt.
-    local function saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID, Total_Distance_Traveled, First_activation)
+    local function saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State, Total_Distance_Traveled, First_activation)
         local saveData = { -- <- Hier bitte noch weiter Daten hinzufügen die nach einem Neustart wieder benötigt werden
             ["MineForResource"] = MineForResource,
             ["Travel_Distance"] = Travel_Distance,
             ["Base_Position"] = Base_Position,
             ["Turtle_State"] = Turtle_State,
             ["Fuel_Percent"] = fuel.getFuelPercent(),
-            ["Current_Position"] = gps.locate(),
+            ["Current_Position"] = get_gps_position(),
             ["Total_Distance_Traveled"] = Total_Distance_Traveled,
             ["First_activation"] = First_activation,
             ["DemeterID"] = DemeterID
@@ -88,13 +104,13 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
             }
             write_mission_file(new_mission_table)
-            communication.Send_Update(new_mission_table)
+            communication.Send_Update("update", new_mission_table)
         else
             logger.log("error", "Could not update MineForResource")
         end
@@ -109,13 +125,13 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
             }
             write_mission_file(new_mission_table)
-            communication.Send_Update(new_mission_table)
+            communication.Send_Update("update", new_mission_table)
         else
             logger.log("error", "Could not update Travel_Distance")
         end
@@ -130,13 +146,13 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = session_distance + old_mission_table["Travel_Distance"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
             }
             write_mission_file(new_mission_table)
-            communication.Send_Update(new_mission_table)
+            communication.Send_Update("update", new_mission_table)
         else
             logger.log("error", "Could not update Travel_Distance")
         end
@@ -151,7 +167,7 @@ Progress.new = function()
                 ["Base_Position"] = Base_Position,
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
@@ -171,13 +187,13 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = Turtle_State,
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
             }
             write_mission_file(new_mission_table)
-            communication.Send_Update(new_mission_table)
+            communication.Send_Update("update", new_mission_table)
         else
             logger.log("error", "Could not update Turtle_State")
         end
@@ -192,13 +208,13 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = Fuel_Percent,
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
             }
             write_mission_file(new_mission_table)
-            communication.Send_Update(new_mission_table)
+            communication.Send_Update("update", new_mission_table)
         else
             logger.log("error", "Could not update Fuel_Percent")
         end
@@ -213,13 +229,13 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = old_mission_table["DemeterID"]
             }
             write_mission_file(new_mission_table)
-            communication.Send_Update(new_mission_table)
+            communication.Send_Update("update", new_mission_table)
         else
             logger.log("error", "Could not update Current_Position")
         end
@@ -233,7 +249,7 @@ Progress.new = function()
             ["Base_Position"] = " ",
             ["Turtle_State"] = " ",
             ["Fuel_Percent"] = " ",
-            ["Current_Position"] = gps.locate(),
+            ["Current_Position"] = get_gps_position(),
             ["Total_Distance_Traveled"] = " ",
             ["First_activation"] = date_time,
             ["DemeterID"] = DemeterID
@@ -250,7 +266,7 @@ Progress.new = function()
                 ["Base_Position"] = old_mission_table["Base_Position"],
                 ["Turtle_State"] = old_mission_table["Turtle_State"],
                 ["Fuel_Percent"] = old_mission_table["Fuel_Percent"],
-                ["Current_Position"] = gps.locate(),
+                ["Current_Position"] = get_gps_position(),
                 ["Total_Distance_Traveled"] = old_mission_table["Total_Distance_Traveled"],
                 ["First_activation"] = old_mission_table["First_activation"],
                 ["DemeterID"] = DemeterID

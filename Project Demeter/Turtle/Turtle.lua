@@ -3,12 +3,14 @@ require "functions.Fuel"
 require "functions.Progress"
 require "functions.Logger"
 require "functions.InventoryManager"
+require "functions.Communication"
 
 local move = Move.new()
 local logger = Logger.new()
 local fuel = Fuel.new()
 local progress = Progress.new()
 local inventorymanager = InventoryManager.new()
+local communication = Communication.new()
 
 Development = true
 
@@ -64,7 +66,10 @@ Travel_Distance = 0
 Base_Position = {["x"]= 0, ["y"] = 0, ["z"] = 0}
 
 Pickaxe_Equipped = false
-Modem_Equipped = false
+Offline_Mode = false
+GPS_Enabled = false
+
+DemeterID = 0
 
 --Orientation muss entweder jedes mal herausgefunden werden oder mit gespeichert werden
 Orientation = 0 -- 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
@@ -163,7 +168,7 @@ local function check_left_Attachement()
         if itemName == "minecraft:diamond_pickaxe" then
             Pickaxe_Equipped = true
         elseif itemName == "computercraft:wireless_modem_advanced" then
-            Modem_Equipped = true
+            Offline_Mode = false
         end
     end
     turtle.equipLeft()
@@ -179,7 +184,7 @@ local function check_right_Attachement()
         if itemName == "minecraft:diamond_pickaxe" then
             Pickaxe_Equipped = true
         elseif itemName == "computercraft:wireless_modem_advanced" then
-            Modem_Equipped = true
+            Offline_Mode = false
         end
     end
     turtle.equipRight()
@@ -207,7 +212,14 @@ local function check_turtle_functional()
     turtle.select(1)
 
     if not Pickaxe_Equipped then
+        logger.log("error", "No pickaxe equipped.")
+        communication.Send_Emergency("pickaxe_missing", fuel.getFuelPercent())
+        Turtle_State = "EMERGENCY"
+        -- hier bin ich mir noch nicht ganz sich ob ich die Turtle zurück zur Base schicken soll oder nicht (wahrscheinlich ja)
         return false
+    else
+        --check ATLAS / DEMETER connection
+        logger.log("info", "Pickaxe is equipped.")
     end
     
     return true
@@ -250,7 +262,7 @@ local function setup()
     end
 
     -- muss überarbeitet werden
-    progress.saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State, DemeterID)
+    progress.saveProgress_local(MineForResource, Travel_Distance, Base_Position, Turtle_State)
 
     set_Orientation()
 
@@ -280,12 +292,20 @@ local function setup()
     stripmine()
 end
 
-if check_turtle_functional() == false then
+if not check_turtle_functional() then
     --Hier wird gecheckt ob die Turtle noch funktioniert, wenn nicht wird sie in den Emergency state versetzt
     --und die Turtle wird zurück zur Base geschickt
+    if not Offline_Mode then --Keine Pickaxe aber Modem
+        logger.log("error", "Turtle is not functional. Sending emergency message to Demeter.")
+        --Communication.sendEmergencyMessage("Turtle is not functional. Returning to base.")
+    end
     logger.log("error", "Turtle is not functional.")
     exit()
+else
+    logger.log("info", "Turtle is functional.")
 end
+
+
 exit()
 if Development then
     set_Orientation()
