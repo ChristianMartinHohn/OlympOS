@@ -50,11 +50,29 @@ Communication.new = function()
         end
     end
 
+    local function ping_Demeter()
+        rednet.send(DemeterID, "Ping", "PING")
+        local id, message, protocol = rednet.receive(5)
+        if id == DemeterID and message and protocol == "PING" then
+            logger.log("info", "Demeter is online")
+            return true
+        else
+            logger.log("error", "Demeter is offline or not responding")
+            return false
+        end
+        return
+    end
+
+    
+
+    -- check ATLAS Connection
+    -- check DEMETER Connection
+
     local function setup_Demeter_Connection()
         screen_helper.draw_demeter_seach_screen(0, 1)
         local msg = "@ New Turtle Login" --@ als login, ! als error, ? als request, % als update .. ungefair so in der art
         local encrypted_msg = encrypt_demeter_message(msg)
-        rednet.broadcast(encrypted_msg)
+        rednet.broadcast(encrypted_msg, "T_LOGIN")
         local id, message = rednet.receive(nil, 10)
         if message ~= nil then
             local decrypted_message = decrypt_demeter_message(message)
@@ -78,7 +96,7 @@ Communication.new = function()
             if demeter_message ~= nil then
                 demeter_message["MessageType"] = message_type
                 logger.log("info", "Sending Update to Demeter")
-                rednet.send(DemeterID, demeter_message)
+                rednet.send(DemeterID, demeter_message, "T_UPDATE")
             else
                 logger.log("error", "No Message to send")
                 return false
@@ -101,7 +119,7 @@ Communication.new = function()
                     ["Current_Position"] = get_gps_position(),
                     ["MessageType"] = "Emergency"
                 }
-                rednet.send(DemeterID, message)
+                rednet.send(DemeterID, message, "T_EMERGENCY")
                 return true
             else
                 logger.log("error", "No Message to send")
@@ -117,5 +135,6 @@ Communication.new = function()
     self.Send_Update = Send_Update
     self.setup_Demeter_Connection = setup_Demeter_Connection
     self.Send_Emergency = Send_Emergency
+    self.ping_Demeter = ping_Demeter
     return self
 end

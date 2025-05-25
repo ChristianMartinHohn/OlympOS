@@ -219,9 +219,15 @@ local function check_turtle_functional()
         return false
     else
         --check ATLAS / DEMETER connection
-        logger.log("info", "Pickaxe is equipped.")
+        if not communication.ping_Demeter() then
+            logger.log("error", "Demeter is offline or not responding")
+        else
+            logger.log("info", "Demeter is online")
+        end
+
+        
     end
-    
+
     return true
 end
 
@@ -291,6 +297,7 @@ local function setup()
     -- Start strip mining
     stripmine()
 end
+
 
 if not check_turtle_functional() then
     --Hier wird gecheckt ob die Turtle noch funktioniert, wenn nicht wird sie in den Emergency state versetzt

@@ -31,9 +31,15 @@ Communication.new = function ()
         rednet.send(turtle_id, encrypted_message)
     end
 
+    local function awnser_ping(turtle_id)
+        local message = "PONG"
+        rednet.send(turtle_id, message, "PING")
+    end
+
     self.decrypt_turtle_message = decrypt_turtle_message
     self.encrypt_turtle_message = encrypt_turtle_message
     self.awnser_turtle_login = awnser_turtle_login
+    self.awnser_ping = awnser_ping
 
     return self
 end
